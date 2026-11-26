@@ -547,21 +547,22 @@ Son siete fases que suman unas 8 h 45 min y dejan 15 min de margen dentro de las
 | Fase | Rama | Contenido | Criterio de salida | Tiempo |
 | --- | --- | --- | --- | --- |
 | F0 Base | `develop` | Git con `main` y `develop`, `.gitignore`, `schema.sql`, `seed.sql`, `seed_usuarios.py`, `conexion.py`, `config.py`, `.env.example`, CORS | Las 8 tablas existen en la base principal y en la de pruebas; catálogos y 2 usuarios cargados; `GET /health` responde | 0:45 |
-| F1 Backend ciudadano | `feature/backend` | Catálogos, `POST/GET/PUT/DELETE` de reportes, fotos, historial, `get_current_user` en modo dev, `require_rol` | `pytest` en verde para CRUD, fotos inválidas y propiedad | 1:30 |
-| F2 Backend operador | `feature/backend` | Bandeja con filtros, asignar, rechazar, iniciar atención, cerrar | `pytest` en verde para las 4 transiciones, el `409` y la entidad incompatible | 1:00 |
-| F3 Frontend ciudadano | `feature/frontend` | Layout con aviso, selector temporal de usuario, interfaces, servicios, mapa, formulario con resumen, Mis reportes, detalle, editar, eliminar | Desde el navegador se crea, ve, edita y elimina un reporte con foto y pin | 2:00 |
-| F4 Frontend operador | `feature/frontend` | Bandeja con filtros y pantalla de revisión con el panel de acciones | Desde el navegador se lleva un reporte de `RECIBIDO` a `CERRADO` y otro a `RECHAZADO` | 1:00 |
-| F5 Autenticación | `feature/auth`-backend + feature/auth-frontend | Registro, login, `/auth/me`, Argon2id, JWT, interceptor, guards, cerrar sesión; eliminar el modo dev | `pytest` de auth en verde; no queda `X-Dev-Usuario-Id` en el código | 1:30 |
+| F1 Backend ciudadano | `kerry` | Catálogos, `POST/GET/PUT/DELETE` de reportes, fotos, historial, `get_current_user` en modo dev, `require_rol` | `pytest` en verde para CRUD, fotos inválidas y propiedad | 1:30 |
+| F2 Backend operador | `kerry` | Bandeja con filtros, asignar, rechazar, iniciar atención, cerrar | `pytest` en verde para las 4 transiciones, el `409` y la entidad incompatible | 1:00 |
+| F3 Frontend ciudadano | `gersson` | Layout con aviso, selector temporal de usuario, interfaces, servicios, mapa, formulario con resumen, Mis reportes, detalle, editar, eliminar | Desde el navegador se crea, ve, edita y elimina un reporte con foto y pin | 2:00 |
+| F4 Frontend operador | `gersson` | Bandeja con filtros y pantalla de revisión con el panel de acciones | Desde el navegador se lleva un reporte de `RECIBIDO` a `CERRADO` y otro a `RECHAZADO` | 1:00 |
+| F5 Autenticación | `kerry` + `gersson` | Registro, login, `/auth/me`, Argon2id, JWT, interceptor, guards, cerrar sesión; eliminar el modo dev | `pytest` de auth en verde; no queda `X-Dev-Usuario-Id` en el código | 1:30 |
 | F6 Validación y entrega | `develop` → `main` | Guion completo de la sección 13, ajustes, README con el alcance de esta entrega y los comandos | Las 20 pruebas del guion pasan; merge a `main` | 1:00 |
 
 **Uso con Orca y OpenCode**
 
-1. **F0 (Fernando):** un solo agente sobre `develop`, incluida la base de pruebas.
-2. **F1 y F2 (Fernando):** agente en el *worktree* `feature/backend`.
-3. **F3 y F4 (Gersson), en paralelo desde el inicio:** agente en el *worktree* `feature/frontend`, trabajando contra el contrato de la sección 7. Cada pantalla se conecta al backend real cuando su endpoint ya está en `develop`.
-4. **Integración:** merge de ambas ramas a `develop` y prueba del flujo completo en modo dev.
-5. **F5 dividida:** Fernando hace el backend en `feature/auth-backend` y Gersson el frontend en `feature/auth-frontend`. Se fusionan juntas, porque el modo dev se elimina en los dos lados a la vez.
-6. **F6 (los dos):** recorren el guion de la sección 13 y hacen el merge final a `main`.
+1. **Ramas:** cada integrante trabaja en su rama personal (`kerry` para Fernando y `gersson` para Gersson). `develop` solo recibe lo que se integra de las dos ramas, y `main` solo lo que ya se validó en `develop`.
+2. **F0 (hecha):** ya está en `develop` como base común. Las dos ramas personales nacen de ahí.
+3. **F1 y F2 (Fernando):** en `kerry`.
+4. **F3 y F4 (Gersson), en paralelo:** en `gersson`, contra el contrato de la sección 7. Conecta cada pantalla al backend real cuando el endpoint ya está en `develop`.
+5. **Integración:** merge de `kerry` y de `gersson` a `develop`, y prueba del flujo completo en modo dev. Después, cada uno actualiza su rama desde `develop`.
+6. **F5 al final (login real):** Fernando hace el backend en `kerry` y Gersson el frontend en `gersson`. Se integran juntas en `develop`, porque el modo dev se elimina en los dos lados a la vez.
+7. **F6 (los dos):** recorren el guion de la sección 13 en `develop` y, si todo pasa, hacen el merge a `main`.
 
 A cada agente se le entrega este documento completo.
 
