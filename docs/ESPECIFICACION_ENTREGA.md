@@ -260,7 +260,7 @@ CREATE TABLE historial_estado (
 
 ## 7. Contrato de la API REST
 
-La base es `http://127.0.0.1:8000/api`. El backend y el frontend se implementan contra este contrato sin cambiar rutas ni nombres de campos. Todo es JSON, salvo la creación de reportes (`multipart/form-data`). Las fechas van en ISO 8601 y los errores usan el formato de FastAPI: `{"detail": "mensaje"}`.
+La base es `http://localhost:8000`. El backend y el frontend se implementan contra este contrato sin cambiar rutas ni nombres de campos. Todo es JSON, salvo la creación de reportes (`multipart/form-data`). Las fechas van en ISO 8601 y los errores usan el formato de FastAPI: `{"detail": "mensaje"}`.
 
 **Autenticación (fase 5)**
 
@@ -335,7 +335,7 @@ En FastAPI, `GET /reportes/mis-reportes` se declara **antes** que `GET /reportes
 }
 ```
 
-La respuesta nunca incluye `contrasena_hash`. Las fotos se sirven con `StaticFiles` montado en `/uploads` (fuera de `/api`), con nombres aleatorios no adivinables; ver la limitación en la sección 14.
+Las rutas no llevan prefijo `/api`, igual que el ejemplo. La respuesta nunca incluye `contrasena_hash`. Las fotos se sirven con `StaticFiles` montado en `/uploads` (por ejemplo `http://localhost:8000/uploads/reportes/3f9a…c1.jpg`), con nombres aleatorios no adivinables; ver la limitación en la sección 14.
 
 ## 8. Validaciones y errores
 
@@ -414,15 +414,31 @@ Son ocho pantallas en Angular 22 con componentes *standalone* y SCSS responsive.
 **Estructura de `frontend/src/app/`**
 
 ```text
-components/   layout (aviso de simulación + barra con nombre, rol y cerrar sesión),
-              login, registro, mis-reportes, reporte-form, reporte-detalle,
-              mapa-selector, estado-badge, bandeja-operador, revision-operador
-interfaces/   usuario.ts, catalogo.ts, reporte.ts  (espejo exacto de la sección 7)
-services/     auth.service.ts, catalogo.service.ts, reporte.service.ts, operador.service.ts
-config/       api.config.ts  (apiUrl = 'http://127.0.0.1:8000/api', uploadsUrl)
-guards/       auth.guard.ts, rol.guard.ts
-interceptors/ auth.interceptor.ts
+frontend/src/
+├── environments/  environment.ts, environment.development.ts
+│                  apiUrl = 'http://localhost:8000' (sin barra final); devUsuarios solo en development
+└── app/
+    app.routes.ts, app.config.ts
+    components/    layout/, login/, registro/, mis-reportes/, reporte-form/, reporte-detalle/,
+                   mapa-selector/, estado-badge/, bandeja-operador/, revision-operador/
+                   (cada uno con xxx.ts + xxx.html; clase sin sufijo: Login, ReporteForm…)
+    interfaces/    auth.interface.ts, catalogo.interface.ts, reporte.interface.ts
+    services/      auth.service.ts, sesion.service.ts, catalogo.service.ts,
+                   reporte.service.ts, operador.service.ts
+    guards/        auth.guard.ts  (authGuard, invitadoGuard, rolGuard)
+    interceptors/  auth.interceptor.ts
 ```
+
+**Convenciones del frontend (iguales al ejemplo)**
+
+- **URLs:** los servicios arman la URL con `${environment.apiUrl}/reportes`. No hay carpeta `config/`. Los *environments* se generan con `ng generate environments`.
+- **Servicios:** `inject(HttpClient)`, `async`/`await` con `firstValueFrom` y estado en *signals*.
+- **Interfaces:** tipos `XxxApi` en *snake\_case*, espejo de la sección 7, y modelos de la app en *camelCase*. La conversión se hace con `desdeApi`/`haciaApi` dentro del servicio.
+- **Sesión:** `SesionService` guarda token, usuario, rol y expiración en `localStorage` y no usa `HttpClient`. `AuthService` hace las peticiones y delega en él. El interceptor depende de `SesionService`.
+- **Guards:** `authGuard`, `invitadoGuard` y `rolGuard` (compara con `data.rol` de la ruta). Las rutas usan `loadComponent`.
+- **Formularios:** *Signal Forms* (`@angular/forms/signals`: `form`, `required`, `email`…), como `login.ts` del ejemplo.
+- **SSR y Leaflet:** si el proyecto tiene SSR (`app.config.server.ts`), Leaflet se carga solo en el navegador (`afterNextRender(async () => { const L = await import('leaflet'); … })`) y `localStorage` se protege con `isPlatformBrowser`, como hace el ejemplo.
+- **CORS:** el backend acepta al frontend con `CORS_ORIGENES` del `.env`.
 
 Una barra fija muestra siempre: *«Simulación académica — no es un canal oficial de emergencias»*. Cada operación exitosa muestra un mensaje de confirmación, y cada error muestra el `detail` del backend.
 
@@ -436,7 +452,7 @@ La autenticación se implementa al final, como recomendó el profesor, pero el c
 - En Angular, `auth.interceptor.ts` envía esa cabecera, y el layout tiene un selector temporal «Actuar como: Ciudadano demo / Operador» guardado en `localStorage`.
 - `require_rol("OPERADOR")` y `require_rol("CIUDADANO")` ya protegen los endpoints desde la fase 1, así los permisos se prueban desde el inicio.
 
-Los ids del selector temporal los imprime `seed_usuarios.py` al terminar (id del operador e id del ciudadano demo) y se copian en `config/api.config.ts` como `devUsuarios`. No se crea ningún endpoint para listar usuarios.
+Los ids del selector temporal los imprime `seed_usuarios.py` al terminar (id del operador e id del ciudadano demo) y se copian en `environments/environment.development.ts` como `devUsuarios`. No se crea ningún endpoint para listar usuarios.
 
 **Fase 5: autenticación real**
 
@@ -445,7 +461,7 @@ Los ids del selector temporal los imprime `seed_usuarios.py` al terminar (id del
 - **Verificación:** `get_current_user` lee `Authorization: Bearer <token>`, decodifica y valida `exp`, y carga el usuario desde MySQL. Si algo falla, responde `401`.
 - **Login:** el mismo mensaje «Credenciales inválidas» tanto si el correo no existe como si la contraseña es incorrecta.
 - **Registro:** siempre crea rol `CIUDADANO`; si el cliente envía un campo `rol`, se ignora.
-- **Angular:** `AuthService` guarda `access_token` y `usuario` en `localStorage`. El interceptor agrega `Authorization: Bearer`; ante un `401` cierra la sesión y redirige a `/login`. `authGuard` exige token y `rolGuard` compara el rol con `data.rol` de la ruta. Cerrar sesión borra el almacenamiento.
+- **Angular:** `AuthService` pide el token y `SesionService` guarda `access_token`, `usuario`, `rol` y la expiración en `localStorage`. El interceptor agrega `Authorization: Bearer`; ante un `401` cierra la sesión y redirige a `/login`. `authGuard` exige token, `invitadoGuard` impide volver a login con sesión activa y `rolGuard` compara el rol con `data.rol` de la ruta. Cerrar sesión borra el almacenamiento.
 - **Limpieza obligatoria:** al terminar la fase 5 se eliminan `AUTH_MODO`, la cabecera `X-Dev-Usuario-Id` y el selector temporal. No debe quedar ninguna puerta trasera en la entrega.
 
 **Variables de entorno (`backend/.env.example`, sin valores reales)**
@@ -475,46 +491,54 @@ Los nombres de las variables de base de datos son una propuesta. Si el `backend/
 
 ## 11. Arquitectura y restricciones técnicas
 
-La arquitectura del profesor es obligatoria. En el backend: **`main.py` → `apis/` → `services/` → `repositories/` → MySQL**, con `schemas/` validando de forma transversal. En el frontend: **componentes → servicios → API REST**, con `interfaces/` como contratos.
+La arquitectura copia la del proyecto ejemplar del profesor (backend de `personas`). Las dependencias van en un solo sentido, **`main.py` → `apis/` → `services/` → `repositories/` → MySQL**, y de vuelta por el mismo camino. `schemas/` lo usan `apis/`, `services/` y `repositories/`. `core/` contiene la infraestructura y es el único lugar que arma la cadena conexión → repositorio → servicio.
 
-| Capa | Hace | Nunca hace |
-| --- | --- | --- |
-| `main.py` | Crea la app, configura CORS, registra *routers*, monta `/uploads` | Lógica de negocio |
-| `apis/` | Rutas, dependencias de sesión y rol, entrada y salida con schemas, traduce errores a HTTP | SQL, reglas de negocio |
-| `schemas/` | Modelos Pydantic de entrada y salida | Acceso a datos |
-| `services/` | Reglas RR-01 a RR-12, permisos de propiedad, transiciones, hash y JWT, archivos, abrir y cerrar transacciones | SQL directo |
-| `repositories/` | SQL parametrizado con `%s` y `mysql-connector-python`; reciben la conexión del servicio | Decisiones de negocio |
+| Módulo | Puede importar | Nunca importa | Responsabilidad |
+| --- | --- | --- | --- |
+| `main.py` | `apis/`, `core/` | `services/`, `repositories/` | Crea la app, CORS, registra *routers*, *handlers* de excepciones, *lifespan* y monta `/uploads`. Sin endpoints ni lógica |
+| `apis/` | `core.dependencies` (los `*Dep`), `schemas/` | `repositories/`, `mysql.connector` | Rutas: reciben un schema, llaman al servicio y devuelven un schema |
+| `services/` | `repositories/`, `schemas/`, `services.exceptions`, `services.security`, `core.config` | `fastapi`, SQL | Reglas RR-01 a RR-12, propiedad del reporte, transiciones, hash, JWT y archivos |
+| `repositories/` | `schemas/`, `services.exceptions`, `mysql.connector` | `fastapi`, `argon2`, `jwt` | Solo SQL parametrizado con `%s`. Reciben la conexión en el constructor y no hacen *commit* |
+| `schemas/` | `pydantic` | Las demás capas | Contratos de entrada y salida |
+| `core/` | Todo lo necesario para cablear | — | `config.py`, `database.py`, `dependencies.py`, `exception_handlers.py`, `lifespan.py` |
+
+**Convenciones (iguales al ejemplo)**
+
+- **Clases:** `XxxRepository(connection)` y `XxxService(repository)`. En `core/dependencies.py` se construyen con `Depends` y se exponen como `XxxServiceDep`; las APIs solo reciben esos `*Dep`.
+- **Archivos por entidad, en plural:** el mismo nombre en cada capa cuando aplica (`reportes.py` en `apis/`, `services/`, `repositories/` y `schemas/`).
+- **Schemas:** `Entidad` + `Create`/`Update` para el CRUD (`ReporteCreate`, `ReporteUpdate`); sustantivos para las salidas (`ReporteResumen`, `ReporteDetalle`, `Usuario`, `Token`); acciones en español para el resto (`UsuarioRegistro`, `UsuarioLogin`, `ReporteAsignar`, `ReporteRechazar`, `ReporteIniciarAtencion`, `ReporteCerrar`). Los textos se recortan con `ConfigDict(str_strip_whitespace=True)`.
+- **Fila interna con el hash:** `UsuarioRecord` (`dataclass`) vive en `repositories/usuarios.py` y nunca sale del servicio; la API expone `schemas.auth.Usuario`.
+- **Conexión y transacción:** `core/database.py` define `get_db()`, que abre una conexión de `mysql-connector-python` por request y hace *commit* al final o *rollback* si hay una excepción. Por eso crear un reporte con sus fotos y su historial es atómico. Si algo falla después de escribir fotos en disco, el servicio las borra y vuelve a lanzar la excepción.
+- **SQL:** consultas parametrizadas con `%s` dentro de los repositorios, **sin procedimientos almacenados**. Se usa `cursor(dictionary=True)`. Un duplicado (`IntegrityError` con `errno` 1062) se traduce a una excepción de dominio dentro del repositorio.
+- **Configuración:** `core/config.py` usa `pydantic-settings` y lee `backend/.env` con las variables de la sección 10.
+- **Errores:** las excepciones de dominio van en `services/exceptions.py` y `core/exception_handlers.py` las traduce a `401`, `403`, `404`, `409` y `422`.
+- **Seguridad:** `services/security.py` contiene Argon2id y JWT. `get_current_user` y `require_rol` van en `core/dependencies.py`.
+- **Health:** `apis/health.py` → `services/health.py` → `core.database.check_connection()` (`SELECT 1`), igual que el ejemplo.
+- **Seed:** `scripts/seed_usuarios.py` abre una conexión, construye `UsuarioRepository` y el servicio, y llama a un método del servicio. Nunca escribe SQL ni llama al repositorio directamente.
 
 ```text
 backend/src/backend/
 ├── main.py
-├── config.py                  # carga .env con python-dotenv
-├── apis/          auth_api.py, catalogo_api.py, reporte_api.py, operador_api.py, dependencias.py
-├── schemas/       usuario_schema.py, catalogo_schema.py, reporte_schema.py
-├── services/      auth_service.py, seguridad_service.py, catalogo_service.py,
-│                  reporte_service.py, operador_service.py, foto_service.py
-└── repositories/  conexion.py, usuario_repository.py, catalogo_repository.py,
-                   reporte_repository.py, foto_repository.py, historial_repository.py
+├── core/          config.py, database.py, dependencies.py, exception_handlers.py, lifespan.py
+├── apis/          auth.py, catalogos.py, reportes.py, operador.py, health.py
+├── schemas/       auth.py, catalogos.py, reportes.py
+├── services/      auth.py, catalogos.py, reportes.py, operador.py, fotos.py, health.py,
+│                  security.py, exceptions.py
+└── repositories/  usuarios.py, catalogos.py, reportes.py, fotos.py, asignaciones.py, historial.py
 backend/scripts/seed_usuarios.py
-backend/tests/     conftest.py, test_auth.py, test_reportes_ciudadano.py,
-                   test_operador.py, test_permisos.py
+backend/tests/     conftest.py, test_auth.py, test_reportes.py, test_operador.py, test_permisos.py
 backend/uploads/reportes/      # en .gitignore
 database/schema.sql, database/seed.sql
 ```
 
-**Errores de dominio:** los servicios lanzan excepciones propias (`NoEncontrado`, `TransicionInvalida`, `DatosInvalidos`, `SinPermiso`) y un *handler* en `main.py` las traduce a `404`, `409`, `422` y `403`. Así los servicios no dependen de HTTP.
-
-**Dependencias:** a las que ya existen (`fastapi`, `uvicorn`, `mysql-connector-python`, `python-dotenv`) se agregan con `uv add` `python-multipart`, `argon2-cffi` y `PyJWT`, y como dependencias de desarrollo `pytest` y `httpx`. En el frontend se agregan `leaflet` y `@types/leaflet`.
-
-Para validar el correo con `EmailStr` de Pydantic se agrega también `email-validator`. En las pruebas, `UPLOADS_DIR` apunta a una carpeta temporal para no llenar `uploads/` con archivos de prueba.
+**Dependencias:** `fastapi`, `uvicorn`, `mysql-connector-python`, `pydantic-settings`, `python-multipart`, `argon2-cffi`, `PyJWT` y `email-validator`; como dependencias de desarrollo, `pytest` y `httpx`. En el frontend se agregan `leaflet` y `@types/leaflet`.
 
 **Restricciones**
 
-- Prohibido: SQLAlchemy, cualquier ORM y Flutter. Docker se usa solo para correr el servidor MySQL 8.4 local (puerto 3307); el backend y el frontend no se ejecutan en Docker y no se usa Docker Compose.
+- Prohibido: SQLAlchemy, cualquier ORM y Flutter. Docker se usa solo para el servidor MySQL 8.4 local (puerto 3307); el backend y el frontend no corren en Docker.
 - SQL siempre parametrizado; nunca concatenar valores del usuario en una consulta.
 - Ningún secreto en el repositorio, en el código, en los logs ni en las respuestas de la API.
-- SSR no es necesario.
-- Las pruebas usan una base aparte, `wkPrueba_test`, con el mismo esquema, seleccionada por variable de entorno en `conftest.py`.
+- Las pruebas usan la base `wkPrueba_test` (`DB_NOMBRE_TEST`), seleccionada en `conftest.py`. En las pruebas, `UPLOADS_DIR` apunta a una carpeta temporal.
 
 ## 12. Plan de implementación por fases
 
