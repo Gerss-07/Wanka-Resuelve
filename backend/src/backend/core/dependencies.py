@@ -9,11 +9,16 @@ from mysql.connector import MySQLConnection
 from backend.core.config import get_settings
 from backend.core.database import get_db
 from backend.repositories.catalogos import CatalogoRepository
+from backend.repositories.fotos import FotoRepository
+from backend.repositories.historial import HistorialRepository
+from backend.repositories.reportes import ReporteRepository
 from backend.repositories.usuarios import UsuarioRepository
 from backend.schemas.auth import Usuario
 from backend.services.catalogos import CatalogoService
 from backend.services.exceptions import NoAutorizado, SinPermiso
+from backend.services.fotos import FotoService
 from backend.services.health import HealthService
+from backend.services.reportes import ReporteService
 from backend.services.usuarios import UsuarioService
 
 
@@ -36,7 +41,7 @@ UsuarioServiceDep = Annotated[UsuarioService, Depends(get_usuario_service)]
 
 def get_current_user(
     service: UsuarioServiceDep,
-    x_dev_usuario_id: Annotated[str | None, Header(include_in_schema=False)] = None,
+    x_dev_usuario_id: Annotated[str | None, Header(description="Temporal, solo con AUTH_MODO=dev (se elimina en F5)")] = None,
 ) -> Usuario:
     """Usuario de la sesión.
 
@@ -72,3 +77,16 @@ def get_catalogo_service(connection: DbDep) -> CatalogoService:
 
 
 CatalogoServiceDep = Annotated[CatalogoService, Depends(get_catalogo_service)]
+
+
+def get_reporte_service(connection: DbDep) -> ReporteService:
+    return ReporteService(
+        ReporteRepository(connection),
+        FotoRepository(connection),
+        HistorialRepository(connection),
+        CatalogoRepository(connection),
+        FotoService(get_settings().uploads_path()),
+    )
+
+
+ReporteServiceDep = Annotated[ReporteService, Depends(get_reporte_service)]

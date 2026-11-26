@@ -46,6 +46,10 @@ class Settings(BaseSettings):
             "connection_timeout": 5,
         }
 
+    def uploads_path(self) -> Path:
+        """Carpeta de fotos; relativa a backend/ salvo que sea absoluta."""
+        return BACKEND_DIR / self.uploads_dir
+
     def allowed_origins(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origenes.split(",") if origin.strip()]
 

@@ -4,7 +4,8 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.apis.catalogos import router as catalogos_router
 from backend.apis.health import router as health_router
-from backend.core.config import BACKEND_DIR, get_settings
+from backend.apis.reportes import router as reportes_router
+from backend.core.config import get_settings
 from backend.core.exception_handlers import register_exception_handlers
 from backend.core.lifespan import lifespan
 
@@ -24,8 +25,9 @@ app.add_middleware(
 )
 app.include_router(health_router)
 app.include_router(catalogos_router)
+app.include_router(reportes_router)
 register_exception_handlers(app)
 app.mount(
-    "/uploads", StaticFiles(directory=BACKEND_DIR / get_settings().uploads_dir, check_dir=False),
+    "/uploads", StaticFiles(directory=get_settings().uploads_path(), check_dir=False),
     name="uploads",
 )
