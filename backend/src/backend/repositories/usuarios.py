@@ -18,6 +18,17 @@ class UsuarioRepository:
         finally:
             cursor.close()
 
+    def buscar_por_id(self, id_usuario: int) -> dict | None:
+        cursor = self.connection.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                "SELECT id_usuario, nombre, correo, rol FROM usuario WHERE id_usuario = %s",
+                (id_usuario,),
+            )
+            return cursor.fetchone()
+        finally:
+            cursor.close()
+
     def crear_usuario(self, nombre: str, correo: str, hash_contrasena: str, rol: str) -> int:
         cursor = self.connection.cursor(dictionary=True)
         try:
