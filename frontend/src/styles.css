@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+@import 'bootstrap/dist/css/bootstrap-grid.min.css';
+@import 'bootstrap/dist/css/bootstrap-utilities.min.css';
+
+:root {
+  color-scheme: light;
+  --ink: #102c3c;
+  --muted: #52676c;
+  --blue: #155f83;
+  --green: #006e68;
+  --surface: #f3f7f5;
+  --line: #d6e2de;
+  --orange: #e89936;
+  --radius: 16px;
+  --shadow: 0 18px 50px rgba(13, 31, 54, .08);
+  --mat-sys-brand-family: Manrope, 'Segoe UI', sans-serif;
+  --mat-sys-plain-family: Manrope, 'Segoe UI', sans-serif;
+  --mat-button-filled-label-text-font: Manrope, 'Segoe UI', sans-serif;
+  --mat-button-text-label-text-font: Manrope, 'Segoe UI', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; color: var(--ink); font-family: Manrope, 'Segoe UI', sans-serif; font-size: 16px; font-weight: 400; line-height: 1.6; letter-spacing: 0; background: #fff; }
+button, input, textarea, select { font: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid #006e68; outline-offset: 4px; }
+@media (min-width: 1200px) { .container { max-width: 1320px; } }
+section[id], footer [id] { scroll-margin-top: 100px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

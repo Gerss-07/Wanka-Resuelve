@@ -1,1 +1,21 @@
-/* You can add global styles to this file, and also import other style files */
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+@import 'bootstrap/dist/css/bootstrap-grid.min.css';
+@import 'bootstrap/dist/css/bootstrap-utilities.min.css';
+
+:root {
+  color-scheme: light;
+  --ink: #102c50;
+  --muted: #53677c;
+  --blue: #0866c6;
+  --green: #009b87;
+  --cream: #f7faf9;
+  --orange: #f59c18;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; color: var(--ink); font-family: 'Segoe UI', Arial, sans-serif; background: white; }
+button, a { font: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid #f59c18; outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
