@@ -8,8 +8,10 @@ from mysql.connector import MySQLConnection
 
 from backend.core.config import get_settings
 from backend.core.database import get_db
+from backend.repositories.catalogos import CatalogoRepository
 from backend.repositories.usuarios import UsuarioRepository
 from backend.schemas.auth import Usuario
+from backend.services.catalogos import CatalogoService
 from backend.services.exceptions import NoAutorizado, SinPermiso
 from backend.services.health import HealthService
 from backend.services.usuarios import UsuarioService
@@ -63,3 +65,10 @@ def require_rol(*roles: str) -> Callable[[Usuario], Usuario]:
 CiudadanoDep = Annotated[Usuario, Depends(require_rol("CIUDADANO"))]
 OperadorDep = Annotated[Usuario, Depends(require_rol("OPERADOR"))]
 AutenticadoDep = Annotated[Usuario, Depends(require_rol("CIUDADANO", "OPERADOR"))]
+
+
+def get_catalogo_service(connection: DbDep) -> CatalogoService:
+    return CatalogoService(CatalogoRepository(connection))
+
+
+CatalogoServiceDep = Annotated[CatalogoService, Depends(get_catalogo_service)]
