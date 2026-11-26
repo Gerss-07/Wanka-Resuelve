@@ -14,7 +14,7 @@ def crear_usuarios_semilla() -> tuple[int, int]:
         nombre = os.getenv(f"{prefijo}_NOMBRE", "").strip()
         correo = os.getenv(f"{prefijo}_CORREO", "").strip().lower()
         contrasena = os.getenv(f"{prefijo}_CONTRASENA", "")
-        if len(nombre) < 2 or not correo or len(contrasena) < 8:
+        if not 2 <= len(nombre) <= 100 or not correo or len(correo) > 150 or not 8 <= len(contrasena) <= 128:
             raise ValueError("Datos de usuarios semilla incompletos o inválidos")
         usuarios.append((nombre, correo, contrasena, rol))
 

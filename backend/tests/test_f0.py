@@ -7,8 +7,8 @@ from mysql.connector import Error as MySQLError
 from backend.apis import health_api
 from backend.config import cors_origenes, db_config
 from backend.main import app
-from backend.repositories import usuario_repository
-from scripts import seed_usuarios
+from backend.repositories import usuario_seed_repository
+from backend.services import seed_usuarios_service
 
 
 client = TestClient(app)
@@ -87,18 +87,32 @@ class ConexionFalsa:
     def cursor(self):
         return CursorFalso(self)
 
+    def commit(self):
+        pass
 
-def test_seed_usuarios_parametrizado_argon2id_y_re_ejecutable():
+    def rollback(self):
+        pass
+
+    def close(self):
+        pass
+
+
+def test_seed_usuarios_parametrizado_argon2id_y_re_ejecutable(monkeypatch):
     connection = ConexionFalsa()
-    datos = [
-        ("operador@demo.test", "Operador Demo", "clave-ficticia-1", "OPERADOR"),
-        ("ciudadano@demo.test", "Ciudadano Demo", "clave-ficticia-2", "CIUDADANO"),
-    ]
-    ids = seed_usuarios.cargar_usuarios(connection, datos)
-    assert ids == [("OPERADOR", 1), ("CIUDADANO", 2)]
-    assert seed_usuarios.cargar_usuarios(connection, datos) == ids
+    monkeypatch.setattr(seed_usuarios_service, "conectar", lambda: connection)
+    datos = (
+        ("OPERADOR", "operador@demo.test", "Operador Demo", "clave-ficticia-1"),
+        ("DEMO_CIUDADANO", "ciudadano@demo.test", "Ciudadano Demo", "clave-ficticia-2"),
+    )
+    for prefijo, correo, nombre, contrasena in datos:
+        monkeypatch.setenv(f"{prefijo}_CORREO", correo)
+        monkeypatch.setenv(f"{prefijo}_NOMBRE", nombre)
+        monkeypatch.setenv(f"{prefijo}_CONTRASENA", contrasena)
+    ids = seed_usuarios_service.crear_usuarios_semilla()
+    assert ids == (1, 2)
+    assert seed_usuarios_service.crear_usuarios_semilla() == ids
     assert len(connection.usuarios) == 2
-    for correo, _, contrasena, _ in datos:
+    for _, correo, _, contrasena in datos:
         hash_contrasena = connection.usuarios[correo][2]
         assert hash_contrasena.startswith("$argon2id$")
         assert PasswordHasher().verify(hash_contrasena, contrasena)
@@ -108,6 +122,6 @@ def test_seed_usuarios_parametrizado_argon2id_y_re_ejecutable():
 
 def test_repositorio_busca_por_correo():
     connection = ConexionFalsa()
-    usuario_repository.crear_usuario(connection, "Demo", "demo@test.example", "hash", "OPERADOR")
-    assert usuario_repository.buscar_por_correo(connection, "demo@test.example") == (1, "OPERADOR")
-    assert usuario_repository.buscar_por_correo(connection, "inexistente@test.example") is None
+    usuario_seed_repository.crear_usuario(connection, "Demo", "demo@test.example", "hash", "OPERADOR")
+    assert usuario_seed_repository.buscar_por_correo(connection, "demo@test.example") == (1, "OPERADOR")
+    assert usuario_seed_repository.buscar_por_correo(connection, "inexistente@test.example") is None
