@@ -8,9 +8,13 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "argon2-cffi>=25.1.0",
+    "email-validator>=2.4.0",
     "fastapi>=0.165.0",
     "mysql-connector-python>=26.10.0",
+    "pyjwt>=2.15.1",
     "python-dotenv>=1.2.4",
+    "python-multipart>=0.0.34",
     "uvicorn>=0.54.0",
 ]
 
@@ -20,3 +24,9 @@ backend = "backend:main"
 [build-system]
 requires = ["uv_build>=0.12.10,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.29.0",
+    "pytest>=9.2.0",
+]
