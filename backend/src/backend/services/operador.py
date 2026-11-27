@@ -6,8 +6,8 @@ from backend.repositories.historial import HistorialRepository
 from backend.repositories.reportes import ReporteRepository
 from backend.schemas.auth import Usuario
 from backend.schemas.reportes import (
-    MENSAJES_CAMPO, ReporteAsignar, ReporteDetalle, ReporteFiltros, ReporteRechazar,
-    ReporteResumen,
+    MENSAJES_CAMPO, ReporteAsignar, ReporteDetalle, ReporteFiltros, ReporteIniciarAtencion,
+    ReporteRechazar, ReporteResumen,
 )
 from backend.services.exceptions import Conflicto, DatosInvalidos, NoEncontrado
 from backend.services.reportes import MENSAJE_ESTADO, MENSAJE_NO_ENCONTRADO, ReporteService
@@ -16,6 +16,7 @@ from backend.services.reportes import MENSAJE_ESTADO, MENSAJE_NO_ENCONTRADO, Rep
 RECIBIDO = "RECIBIDO"
 ASIGNADO = "ASIGNADO"
 RECHAZADO = "RECHAZADO"
+EN_ATENCION = "EN_ATENCION"
 
 
 class OperadorService:
@@ -45,6 +46,13 @@ class OperadorService:
         """RR-07: RECIBIDO → RECHAZADO (final); el motivo queda en el historial."""
         self._reporte_en_estado(id_reporte, RECIBIDO)
         self._transicion(operador, id_reporte, RECIBIDO, RECHAZADO, datos.motivo)
+        return self._detalle(id_reporte)
+
+    def iniciar_atencion(self, operador: Usuario, id_reporte: int,
+                         datos: ReporteIniciarAtencion) -> ReporteDetalle:
+        """RR-08: ASIGNADO → EN_ATENCION, con comentario opcional."""
+        self._reporte_en_estado(id_reporte, ASIGNADO)
+        self._transicion(operador, id_reporte, ASIGNADO, EN_ATENCION, datos.comentario or None)
         return self._detalle(id_reporte)
 
     # ----- reglas comunes -----

@@ -78,6 +78,14 @@ class ReporteRechazar(BaseModel):
     motivo: str = Field(min_length=10, max_length=500)
 
 
+class ReporteIniciarAtencion(BaseModel):
+    """RR-08: comentario opcional (vacío se guarda como NULL)."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    comentario: str | None = Field(default=None, max_length=1000)
+
+
 class UsuarioReferencia(BaseModel):
     id_usuario: int
     nombre: str
