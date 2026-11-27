@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
-@import '@angular/material/prebuilt-themes/azure-blue.css';
 @import 'bootstrap/dist/css/bootstrap-grid.min.css';
 @import 'bootstrap/dist/css/bootstrap-utilities.min.css';
 @import 'leaflet/dist/leaflet.css';
@@ -15,10 +14,6 @@
   --orange: #e89936;
   --radius: 16px;
   --shadow: 0 18px 50px rgba(13, 31, 54, .08);
-  --mat-sys-brand-family: Manrope, 'Segoe UI', sans-serif;
-  --mat-sys-plain-family: Manrope, 'Segoe UI', sans-serif;
-  --mat-button-filled-label-text-font: Manrope, 'Segoe UI', sans-serif;
-  --mat-button-text-label-text-font: Manrope, 'Segoe UI', sans-serif;
 }
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }

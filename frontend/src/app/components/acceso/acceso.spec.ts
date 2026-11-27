@@ -2,23 +2,23 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { Acceso } from './acceso';
 import { AuthService } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
+import { AlertaService } from '../../services/alerta.service';
 
 describe('Acceso', () => {
   it('no envía campos vacíos', async () => {
-    const avisos = { warning: vi.fn(), error: vi.fn() };
-    await TestBed.configureTestingModule({ imports: [Acceso], providers: [provideRouter([]), { provide: ActivatedRoute, useValue: { snapshot: { data: {} } } }, { provide: NotificationService, useValue: avisos }] }).compileComponents();
+    const avisos = { error: vi.fn() };
+    await TestBed.configureTestingModule({ imports: [Acceso], providers: [provideRouter([]), { provide: ActivatedRoute, useValue: { snapshot: { data: {} } } }, { provide: AlertaService, useValue: avisos }] }).compileComponents();
     const fixture = TestBed.createComponent(Acceso);
     const servicio = TestBed.inject(AuthService);
     const enviar = vi.spyOn(servicio, 'iniciarSesion');
     fixture.detectChanges();
     fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
-    expect(avisos.warning).toHaveBeenCalledWith('Completa los campos obligatorios');
+    expect(avisos.error).toHaveBeenCalledWith('Completa los campos obligatorios');
     expect(enviar).not.toHaveBeenCalled();
   });
   it('no muestra éxito cuando el servicio no está disponible', async () => {
-    const avisos = { warning: vi.fn(), error: vi.fn() };
-    await TestBed.configureTestingModule({ imports: [Acceso], providers: [provideRouter([]), { provide: ActivatedRoute, useValue: { snapshot: { data: {} } } }, { provide: NotificationService, useValue: avisos }] }).compileComponents();
+    const avisos = { error: vi.fn() };
+    await TestBed.configureTestingModule({ imports: [Acceso], providers: [provideRouter([]), { provide: ActivatedRoute, useValue: { snapshot: { data: {} } } }, { provide: AlertaService, useValue: avisos }] }).compileComponents();
     const fixture = TestBed.createComponent(Acceso);
     fixture.detectChanges();
     const acceso = fixture.componentInstance as unknown as { form: { patchValue: (v: object) => void }; enviar: () => void };

@@ -2,11 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { MisReportes } from './mis-reportes';
 import { ReporteResumenApi } from '../../interfaces/reporte.interface';
 import { ReporteService } from '../../services/reporte.service';
-import { NotificationService } from '../../services/notification.service';
+import { AlertaService } from '../../services/alerta.service';
 import { environment } from '../../../environments/environment';
 
 describe('MisReportes', () => {
@@ -43,7 +42,7 @@ describe('MisReportes', () => {
   it('oculta editar y eliminar cuando está asignado', async () => {
     const r = { id: 1, codigo: 'WR-2026-000001', ciudadano: 'Ana', categoria: { id:1, nombre:'Pistas' }, distrito: { id:1, nombre:'Huancayo' }, estado:'ASIGNADO', prioridad:'ALTA', fechaCreacion:'2026-11-26T10:00:00' };
     await TestBed.configureTestingModule({
-      imports: [MisReportes], providers: [provideRouter([]), { provide: ReporteService, useValue: { listar: () => Promise.resolve([r]) } }, { provide: NotificationService, useValue: { http: () => '' } }]
+      imports: [MisReportes], providers: [provideRouter([]), { provide: ReporteService, useValue: { listar: () => Promise.resolve([r]) } }, { provide: AlertaService, useValue: { errorHttp: () => '' } }]
     }).compileComponents();
     const fixture = TestBed.createComponent(MisReportes);
     await fixture.whenStable(); fixture.detectChanges();
@@ -56,7 +55,7 @@ describe('MisReportes', () => {
     let llamadas = 0;
     const r = { id: 1, codigo: 'WR-2026-000001', ciudadano:'Ana', categoria:{id:1,nombre:'Pistas'}, distrito:{id:1,nombre:'Huancayo'}, estado:'RECIBIDO', prioridad:null, fechaCreacion:'2026-11-26T10:00:00' };
     await TestBed.configureTestingModule({
-      imports: [MisReportes], providers: [provideRouter([]), { provide: ReporteService, useValue: { listar: () => Promise.resolve([r]), eliminar: () => { llamadas++; } } }, { provide: NotificationService, useValue: { confirm: () => of(false), http: () => '' } }]
+      imports: [MisReportes], providers: [provideRouter([]), { provide: ReporteService, useValue: { listar: () => Promise.resolve([r]), eliminar: () => { llamadas++; } } }, { provide: AlertaService, useValue: { confirmar: async () => false, errorHttp: () => '' } }]
     }).compileComponents();
     const fixture = TestBed.createComponent(MisReportes);
     await fixture.whenStable(); fixture.detectChanges();

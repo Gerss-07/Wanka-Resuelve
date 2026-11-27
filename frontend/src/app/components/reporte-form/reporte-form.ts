@@ -6,7 +6,7 @@ import { Catalogo } from '../../interfaces/catalogo.interface';
 import { ReporteDatos, ReporteDetalle } from '../../interfaces/reporte.interface';
 import { CatalogoService } from '../../services/catalogo.service';
 import { ReporteService } from '../../services/reporte.service';
-import { NotificationService } from '../../services/notification.service';
+import { AlertaService } from '../../services/alerta.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MapaSelector, Punto } from '../mapa-selector/mapa-selector';
 
@@ -33,7 +33,7 @@ interface FotoSeleccionada { archivo: File; url: string }
 @Component({ selector: 'app-reporte-form', imports: [DecimalPipe, ReactiveFormsModule, RouterLink, MapaSelector], templateUrl: './reporte-form.html' })
 export class ReporteForm implements OnDestroy {
   private fb = inject(FormBuilder); private catalogo = inject(CatalogoService); private api = inject(ReporteService);
-  private avisos = inject(NotificationService); private router = inject(Router); private route = inject(ActivatedRoute);
+  private alertas = inject(AlertaService); private router = inject(Router); private route = inject(ActivatedRoute);
   private readonly injector = inject(Injector);
   private readonly titulo = viewChild<ElementRef<HTMLElement>>('titulo');
   private destruido = false;
@@ -71,7 +71,7 @@ export class ReporteForm implements OnDestroy {
     try {
       this.aplicar(await this.api.obtener(this.id));
       if (this.editable()) await this.cargarCatalogos();
-    } catch (e) { this.error.set(this.avisos.http(e)); }
+    } catch (e) { this.error.set(this.alertas.errorHttp(e)); }
     finally { this.cargando.set(false); }
   }
   protected async cargarCatalogos(): Promise<void> {
@@ -88,7 +88,7 @@ export class ReporteForm implements OnDestroy {
         this.catalogosListos.set(true);
       }
     } catch (e) {
-      this.errorCatalogos.set(this.avisos.http(e, 'No se encontraron los catálogos en FastAPI.'));
+      this.errorCatalogos.set(this.alertas.errorHttp(e));
     } finally {
       this.cargando.set(false);
     }
@@ -170,17 +170,17 @@ export class ReporteForm implements OnDestroy {
     this.enviando.set(true);
     this.errorEnvio.set('');
     try {
-      if (this.id) { const r = await this.api.editar(this.id, datos); this.avisos.success('Cambios guardados.'); await this.router.navigate(['/ciudadano/reportes', r.id]); }
+      if (this.id) { const r = await this.api.editar(this.id, datos); void this.alertas.exito('Cambios guardados', 'El reporte se actualizó correctamente.'); await this.router.navigate(['/ciudadano/reportes', r.id]); }
       else {
         const r = await this.api.crear(datos, this.fotos().map(foto => foto.archivo));
         this.creado.set(r);
         this.enfocarTitulo();
-        this.avisos.success('Reporte registrado correctamente.');
+        void this.alertas.exito('Reporte registrado', `El código asignado es ${r.codigo}.`);
       }
     } catch (e) {
-      this.errorEnvio.set(this.avisos.http(e));
+      this.errorEnvio.set(this.alertas.errorHttp(e));
       if (this.id && e instanceof HttpErrorResponse && e.status === 409) {
-        try { this.aplicar(await this.api.obtener(this.id)); } catch (actualizacion) { this.error.set(this.avisos.http(actualizacion)); }
+        try { this.aplicar(await this.api.obtener(this.id)); } catch (actualizacion) { this.error.set(this.alertas.errorHttp(actualizacion)); }
       }
     } finally { this.enviando.set(false); }
   }

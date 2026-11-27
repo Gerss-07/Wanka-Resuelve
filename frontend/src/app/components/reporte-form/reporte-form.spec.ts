@@ -4,7 +4,7 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { firmaFotoValida, textoRecortado, validarFotos, ReporteForm } from './reporte-form';
 import { CatalogoService } from '../../services/catalogo.service';
 import { ReporteService } from '../../services/reporte.service';
-import { NotificationService } from '../../services/notification.service';
+import { AlertaService } from '../../services/alerta.service';
 describe('Validaciones de reporte', () => {
   it('mide textos después de recortar los espacios', () => {
     expect(textoRecortado(10, 1000)(new FormControl('  123456789  '))).not.toBeNull();
@@ -34,7 +34,7 @@ describe('Validaciones de reporte', () => {
       providers: [
         provideRouter([]), { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => null } } } },
         { provide: CatalogoService, useValue: { categorias: async () => [{ id: 1, nombre: 'Pistas' }], distritos: async () => [{ id: 1, nombre: 'Huancayo' }] } },
-        { provide: ReporteService, useValue: {} }, { provide: NotificationService, useValue: { http: () => '' } }
+        { provide: ReporteService, useValue: {} }, { provide: AlertaService, useValue: { errorHttp: () => '' } }
       ]
     }).compileComponents();
     const fixture = TestBed.createComponent(ReporteForm);

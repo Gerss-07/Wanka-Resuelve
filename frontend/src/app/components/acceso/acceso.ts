@@ -3,13 +3,13 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
+import { AlertaService } from '../../services/alerta.service';
 
 @Component({ selector: 'app-acceso', imports: [ReactiveFormsModule, RouterLink], templateUrl: './acceso.html', styleUrl: './acceso.css' })
 export class Acceso {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
-  private readonly avisos = inject(NotificationService);
+  private readonly avisos = inject(AlertaService);
   protected readonly registro = inject(ActivatedRoute).snapshot.data['registro'] === true;
   protected visible = false;
   protected enviando = false;
@@ -25,12 +25,12 @@ export class Acceso {
     this.enviado = true;
     this.form.markAllAsTouched();
     const { nombre, correo, contrasena, confirmar } = this.form.getRawValue();
-    if (!correo.trim() || !contrasena || (this.registro && (!nombre.trim() || !confirmar))) { this.avisos.warning('Completa los campos obligatorios'); return; }
-    if (this.form.controls.correo.invalid) { this.avisos.warning('Ingresa un correo electrónico válido'); return; }
+    if (!correo.trim() || !contrasena || (this.registro && (!nombre.trim() || !confirmar))) { void this.avisos.error('Completa los campos obligatorios'); return; }
+    if (this.form.controls.correo.invalid) { void this.avisos.error('Ingresa un correo electrónico válido'); return; }
     if (this.registro && nombre.trim().length < 2) return;
-    if (this.registro && contrasena !== confirmar) { this.avisos.warning('Las contraseñas no coinciden'); return; }
+    if (this.registro && contrasena !== confirmar) { void this.avisos.error('Las contraseñas no coinciden'); return; }
     this.enviando = true;
     const solicitud = this.registro ? this.auth.registrar(nombre.trim(), correo.trim(), contrasena) : this.auth.iniciarSesion(correo.trim(), contrasena);
-    solicitud.pipe(finalize(() => this.enviando = false)).subscribe({ error: () => this.avisos.error('El servicio de autenticación aún no está disponible.') });
+    solicitud.pipe(finalize(() => this.enviando = false)).subscribe({ error: () => void this.avisos.error('El servicio de autenticación aún no está disponible.') });
   }
 }

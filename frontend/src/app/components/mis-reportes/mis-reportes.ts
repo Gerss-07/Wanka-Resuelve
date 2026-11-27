@@ -1,12 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { LucideArrowRight, LucideMapPin, LucidePlus } from '@lucide/angular';
 import { EstadoBadge } from '../estado-badge/estado-badge';
 import { ReporteResumen } from '../../interfaces/reporte.interface';
 import { ReporteService } from '../../services/reporte.service';
-import { NotificationService } from '../../services/notification.service';
+import { AlertaService } from '../../services/alerta.service';
 import { estadosReporte, ResumenReportes } from './resumen-reportes';
 
 @Component({
@@ -15,7 +14,7 @@ import { estadosReporte, ResumenReportes } from './resumen-reportes';
   templateUrl: './mis-reportes.html',
 })
 export class MisReportes {
-  private api = inject(ReporteService); private avisos = inject(NotificationService);
+  private api = inject(ReporteService); private alertas = inject(AlertaService);
   private readonly ruta = inject(ActivatedRoute);
   protected readonly inicio = this.ruta.snapshot.data['vista'] === 'inicio';
   protected readonly seguimiento = this.ruta.snapshot.data['vista'] === 'seguimiento';
@@ -30,21 +29,21 @@ export class MisReportes {
   constructor() { void this.cargar(); }
   protected async cargar(): Promise<void> {
     this.cargando.set(true); this.error.set('');
-    try { this.reportes.set(await this.api.listar()); } catch (e) { this.error.set(this.avisos.http(e, 'El listado de reportes todavía no está disponible en el servidor.')); }
+    try { this.reportes.set(await this.api.listar()); } catch (e) { this.error.set(this.alertas.errorHttp(e)); }
     finally { this.cargando.set(false); }
   }
   protected async eliminar(reporte: ReporteResumen): Promise<void> {
     if (this.eliminando() !== null || reporte.estado !== 'RECIBIDO') return;
     this.eliminando.set(reporte.id);
     try {
-      const confirmado = await firstValueFrom(this.avisos.confirm('Eliminar reporte', `¿Eliminar ${reporte.codigo}? Esta acción no se puede deshacer.`));
+      const confirmado = await this.alertas.confirmar('¿Seguro que quieres eliminarlo?', `El reporte ${reporte.codigo} y sus fotos se borrarán. Esta acción no se puede deshacer.`);
       if (!confirmado) return;
       await this.api.eliminar(reporte.id);
       this.reportes.update(reportes => reportes.filter(r => r.id !== reporte.id));
-      this.avisos.success('Reporte eliminado correctamente.');
+      void this.alertas.exito('Reporte eliminado', `${reporte.codigo} se eliminó correctamente.`);
       await this.cargar();
     }
-    catch (e) { this.avisos.http(e); await this.cargar(); }
+    catch (e) { this.alertas.errorHttp(e); await this.cargar(); }
     finally { this.eliminando.set(null); }
   }
 }
