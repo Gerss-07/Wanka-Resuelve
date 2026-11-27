@@ -96,3 +96,7 @@ app-layout .f3-history time { color: var(--panel-muted); font-size: .83rem; }
   app-layout .f3-details { grid-template-columns: 1fr; gap: 3px; }
   app-layout .f3-details dd { margin-bottom: .55rem; }
 }
+app-layout .f3-acciones form { padding-block: .4rem 1rem; }
+app-layout .f3-acciones form + form { border-top: 1px solid var(--panel-line); padding-top: 1rem; }
+app-layout .f3-acciones h3 { margin: 0; font-size: 1rem; }
+app-layout .f3-peligro { border-color: #9b2929; color: #9b2929; }

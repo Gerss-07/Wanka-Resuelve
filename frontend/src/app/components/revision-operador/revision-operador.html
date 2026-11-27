@@ -1,4 +1,122 @@
 <a class="f3-back" routerLink="/operador/reportes">← Bandeja</a>
-<p class="f3-eyebrow">Revisión del reporte</p>
-<h1>Reporte {{ id }}</h1>
-<p>Pantalla pendiente (F4).</p>
+@if (cargando() && !reporte()) { <p role="status">Cargando reporte…</p> }
+@else if (error()) { <p role="alert">{{ error() }}</p><button class="f3-secondary" type="button" (click)="cargar()">Volver a intentar</button> }
+@else if (reporte(); as r) {
+  <div class="f3-heading">
+    <div><p class="f3-eyebrow">REVISIÓN DEL REPORTE</p><h1>{{ r.codigo }}</h1><app-estado-badge [estado]="r.estado" /></div>
+  </div>
+
+  <div class="f3-columns">
+    <section class="f3-panel">
+      <h2>Información</h2>
+      <dl class="f3-details">
+        <dt>Ciudadano</dt><dd>{{ r.ciudadano }}</dd>
+        <dt>Categoría</dt><dd>{{ r.categoria.nombre }}</dd>
+        <dt>Distrito</dt><dd>{{ r.distrito.nombre }}</dd>
+        <dt>Descripción</dt><dd>{{ r.descripcion }}</dd>
+        <dt>Dirección o referencia</dt><dd>{{ r.referencia }}</dd>
+        <dt>Creado</dt><dd>{{ r.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</dd>
+        <dt>Actualizado</dt><dd>{{ r.fechaActualizacion | date:'dd/MM/yyyy HH:mm' }}</dd>
+        @if (r.entidad) { <dt>Entidad</dt><dd>{{ r.entidad }}</dd> }
+        @if (r.prioridad) { <dt>Prioridad</dt><dd>{{ r.prioridad }}</dd> }
+        @if (r.motivoRechazo) { <dt>Motivo de rechazo</dt><dd>{{ r.motivoRechazo }}</dd> }
+        @if (r.comentarioSolucion) { <dt>Solución</dt><dd>{{ r.comentarioSolucion }}</dd> }
+      </dl>
+    </section>
+    <section class="f3-panel">
+      <h2>Ubicación</h2>
+      <app-mapa-selector [punto]="{ latitud: r.latitud, longitud: r.longitud }" [soloLectura]="true" />
+      <p>{{ r.latitud }}, {{ r.longitud }}</p>
+      <h2>Fotografías</h2>
+      <div class="f3-photos">@for (foto of r.fotos; track foto.id; let i = $index) { <img [src]="foto.url" [alt]="'Fotografía ' + (i + 1) + ' del reporte'"> }</div>
+    </section>
+  </div>
+
+  <section class="f3-panel f3-acciones" aria-labelledby="titulo-acciones">
+    <h2 id="titulo-acciones">Acciones</h2>
+    @switch (r.estado) {
+      @case ('RECIBIDO') {
+        <form class="f3-form" (submit)="asignar($event)" novalidate aria-label="Asignar reporte">
+          <h3>Asignar</h3>
+          <div class="f3-form-grid">
+            <div>
+              <label for="prioridad">Prioridad</label>
+              <select id="prioridad" [formField]="formAsignar.prioridad">
+                <option value="">Selecciona una prioridad</option>
+                @for (p of prioridades; track p) { <option [value]="p">{{ p }}</option> }
+              </select>
+              @if (formAsignar.prioridad().invalid() && formAsignar.prioridad().touched()) {
+                @for (e of formAsignar.prioridad().errors(); track $index) { <p class="f3-error">{{ e.message }}</p> }
+              }
+            </div>
+            <div>
+              <label for="entidad">Entidad responsable</label>
+              <select id="entidad" [formField]="formAsignar.id_entidad">
+                <option value="">Selecciona una entidad</option>
+                @for (en of entidades(); track en.id) { <option [value]="en.id">{{ en.nombre }}</option> }
+              </select>
+              @if (formAsignar.id_entidad().invalid() && formAsignar.id_entidad().touched()) {
+                @for (e of formAsignar.id_entidad().errors(); track $index) { <p class="f3-error">{{ e.message }}</p> }
+              }
+            </div>
+          </div>
+          <div><button class="f3-button" type="submit" [disabled]="formAsignar().invalid() || enviando()">Asignar reporte</button></div>
+        </form>
+
+        <form class="f3-form" (submit)="rechazar($event)" novalidate aria-label="Rechazar reporte">
+          <h3>Rechazar</h3>
+          <div>
+            <label for="motivo">Motivo del rechazo</label>
+            <textarea id="motivo" rows="3" [formField]="formRechazar.motivo"></textarea>
+            @if (formRechazar.motivo().invalid() && formRechazar.motivo().touched()) {
+              @for (e of formRechazar.motivo().errors(); track $index) { <p class="f3-error">{{ e.message }}</p> }
+            }
+          </div>
+          <div><button class="f3-secondary f3-peligro" type="submit" [disabled]="formRechazar().invalid() || enviando()">Rechazar reporte</button></div>
+        </form>
+      }
+      @case ('ASIGNADO') {
+        <form class="f3-form" (submit)="iniciarAtencion($event)" novalidate aria-label="Iniciar atención">
+          <div>
+            <label for="comentario">Comentario (opcional)</label>
+            <textarea id="comentario" rows="3" [formField]="formAtencion.comentario"></textarea>
+            @if (formAtencion.comentario().invalid() && formAtencion.comentario().touched()) {
+              @for (e of formAtencion.comentario().errors(); track $index) { <p class="f3-error">{{ e.message }}</p> }
+            }
+          </div>
+          <div><button class="f3-button" type="submit" [disabled]="formAtencion().invalid() || enviando()">Registrar inicio de atención (informado por la entidad)</button></div>
+        </form>
+      }
+      @case ('EN_ATENCION') {
+        <form class="f3-form" (submit)="cerrar($event)" novalidate aria-label="Cerrar reporte">
+          <div>
+            <label for="solucion">Comentario de solución</label>
+            <textarea id="solucion" rows="4" [formField]="formCerrar.comentario_solucion"></textarea>
+            @if (formCerrar.comentario_solucion().invalid() && formCerrar.comentario_solucion().touched()) {
+              @for (e of formCerrar.comentario_solucion().errors(); track $index) { <p class="f3-error">{{ e.message }}</p> }
+            }
+          </div>
+          <div><button class="f3-button" type="submit" [disabled]="formCerrar().invalid() || enviando()">Cerrar reporte</button></div>
+        </form>
+      }
+      @default { <p>Reporte finalizado; solo lectura.</p> }
+    }
+    @if (errorAccion()) { <p class="f3-error" role="alert">{{ errorAccion() }}</p> }
+  </section>
+
+  <section class="f3-panel">
+    <h2>Historial de estados</h2>
+    @if (r.historial.length) {
+      <ol class="f3-history">
+        @for (h of r.historial; track $index) {
+          <li>
+            <app-estado-badge [estado]="h.nuevo" />
+            <time [attr.datetime]="h.fecha">{{ h.fecha | date:'dd/MM/yyyy HH:mm' }}</time>
+            <div>{{ h.usuario }}</div>
+            @if (h.comentario) { <p>{{ h.comentario }}</p> }
+          </li>
+        }
+      </ol>
+    } @else { <p>No hay cambios registrados.</p> }
+  </section>
+}
