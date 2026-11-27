@@ -442,6 +442,27 @@ frontend/src/
 - **SSR y Leaflet:** si el proyecto tiene SSR (`app.config.server.ts`), Leaflet se carga solo en el navegador (`afterNextRender(async () => { const L = await import('leaflet'); … })`) y `localStorage` se protege con `isPlatformBrowser`, como hace el ejemplo.
 - **CORS:** el backend acepta al frontend con `CORS_ORIGENES` del `.env`.
 
+**Formularios con Signal Forms (requisito del profesor).** Todos los formularios (login, registro, reporte, editar, asignar, rechazar, iniciar atención y cerrar) siguen este patrón. No se usan `FormGroup`, `ReactiveFormsModule` ni `ngModel`.
+
+- **Modelo:** un `signal<Modelo>({...})` con los valores iniciales.
+- **Formulario:** `form(modelo, (esquema) => { ... })`, con `required`, `minLength`, `maxLength`, `min`, `max`, `email` o `pattern`, cada uno con `{ message: '...' }`. Los textos son los de la sección 8.
+- **HTML:** cada control usa `[formField]="formulario.campo"`, y el componente importa `FormField`.
+- **Errores por campo:** se muestran con `@if (formulario.campo().invalid() && formulario.campo().touched())` y `@for (e of formulario.campo().errors(); track $index)`.
+- **Botón de enviar:** `[disabled]="formulario().invalid()"`. Al enviar, se toman los valores con `modelo()` y se llama al servicio.
+- **Fotos y pin:** el selector de fotos y el mapa no son controles de texto. Se guardan en *signals* del componente y se validan antes de habilitar «Continuar» (de 1 a 3 fotos, pin marcado).
+
+**Alertas con SweetAlert2 (requisito del profesor).** Se instala con `npm install sweetalert2` y se usa desde un solo servicio, `services/alerta.service.ts`, con tres métodos: `exito(titulo, texto)`, `error(texto)` y `confirmar(titulo, texto): Promise<boolean>`. Los componentes nunca importan `Swal` directamente.
+
+| Momento | Alerta |
+| --- | --- |
+| Reporte creado | Éxito con el código generado (`WR-2026-…`) |
+| Reporte editado; asignar, iniciar atención o cerrar | Éxito breve |
+| Eliminar reporte; rechazar reporte | Confirmación previa («¿Seguro?»); solo se llama a la API si el usuario acepta |
+| Error del backend | Error con el `detail` de la respuesta |
+| Registro de cuenta | Éxito y redirección a `/login` |
+
+Los errores de validación por campo siguen mostrándose bajo cada campo, no con SweetAlert2. Con SSR, SweetAlert2 solo se invoca desde acciones del usuario (clics o envíos), que ocurren en el navegador.
+
 Una barra fija muestra siempre: *«Simulación académica — no es un canal oficial de emergencias»*. Cada operación exitosa muestra un mensaje de confirmación, y cada error muestra el `detail` del backend.
 
 ## 10. Autenticación JWT + Argon2id (fase final)
