@@ -6,10 +6,15 @@ import { CategoriaApi, DistritoApi, Catalogo } from '../interfaces/catalogo.inte
 @Injectable({ providedIn: 'root' })
 export class CatalogoService {
   private http = inject(HttpClient);
+  private desdeApi(c: CategoriaApi): Catalogo;
+  private desdeApi(d: DistritoApi): Catalogo;
+  private desdeApi(item: CategoriaApi | DistritoApi): Catalogo {
+    return 'id_categoria' in item ? { id: item.id_categoria, nombre: item.nombre } : { id: item.id_distrito, nombre: item.nombre };
+  }
   async categorias(): Promise<Catalogo[]> {
-    return (await firstValueFrom(this.http.get<CategoriaApi[]>(`${environment.apiUrl}/categorias`))).map(c => ({ id: c.id_categoria, nombre: c.nombre }));
+    return (await firstValueFrom(this.http.get<CategoriaApi[]>(`${environment.apiUrl}/categorias`))).map(c => this.desdeApi(c));
   }
   async distritos(): Promise<Catalogo[]> {
-    return (await firstValueFrom(this.http.get<DistritoApi[]>(`${environment.apiUrl}/distritos`))).map(d => ({ id: d.id_distrito, nombre: d.nombre }));
+    return (await firstValueFrom(this.http.get<DistritoApi[]>(`${environment.apiUrl}/distritos`))).map(d => this.desdeApi(d));
   }
 }
