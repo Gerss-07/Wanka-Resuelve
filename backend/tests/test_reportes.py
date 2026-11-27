@@ -4,62 +4,10 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-
-JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 200
-PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 200
-GIF = b"GIF89a" + b"\x00" * 200
-JPEG_GRANDE = b"\xff\xd8\xff\xe0" + b"\x00" * 2_000_000
-
-CLAVES_RESUMEN = {
-    "id_reporte", "codigo", "ciudadano", "categoria", "distrito", "estado", "prioridad",
-    "fecha_creacion",
-}
-CLAVES_DETALLE = CLAVES_RESUMEN | {
-    "descripcion", "referencia", "latitud", "longitud", "entidad", "motivo_rechazo",
-    "comentario_solucion", "fotos", "historial", "fecha_actualizacion",
-}
-
-
-def cabecera(id_usuario) -> dict:
-    return {"X-Dev-Usuario-Id": str(id_usuario)}
-
-
-def ids_catalogo(sql) -> tuple[int, int, int]:
-    cat = sql("SELECT id_categoria FROM categoria WHERE nombre = %s", ("Pistas y veredas",))[0]
-    dis = sql("SELECT id_distrito FROM distrito WHERE nombre = %s", ("Huancayo",))[0]
-    dis2 = sql("SELECT id_distrito FROM distrito WHERE nombre = %s", ("El Tambo",))[0]
-    return cat["id_categoria"], dis["id_distrito"], dis2["id_distrito"]
-
-
-def datos_reporte(sql, **cambios) -> dict:
-    id_categoria, id_distrito, _ = ids_catalogo(sql)
-    datos = {
-        "id_categoria": id_categoria,
-        "id_distrito": id_distrito,
-        "descripcion": "Hueco profundo en la calzada",
-        "referencia": "Av. Ferrocarril, frente a Mallplaza",
-        "latitud": -12.0651,
-        "longitud": -75.2049,
-    }
-    datos.update(cambios)
-    return datos
-
-
-def crear(client, sql, id_usuario, fotos=(("a.jpg", JPEG, "image/jpeg"), ("b.png", PNG, "image/png")),
-          **cambios):
-    archivos = [("fotos", foto) for foto in fotos]
-    return client.post("/reportes", data=datos_reporte(sql, **cambios), files=archivos,
-                       headers=cabecera(id_usuario))
-
-
-def archivos_en_disco(uploads_dir) -> list:
-    carpeta = uploads_dir / "reportes"
-    return sorted(carpeta.iterdir()) if carpeta.exists() else []
-
-
-def contar(sql, tabla: str) -> int:
-    assert tabla in {"reporte", "foto_reporte", "historial_estado"}
-    return sql(f"SELECT COUNT(*) AS n FROM {tabla}")[0]["n"]
+from apoyo import (
+    CLAVES_DETALLE, CLAVES_RESUMEN, GIF, JPEG, JPEG_GRANDE, PNG, archivos_en_disco, cabecera,
+    contar, crear, datos_reporte, ids_catalogo,
+)
 
 
 # ---------- usuario temporal, permisos y catálogos ----------
@@ -136,7 +84,9 @@ def test_fecha_y_codigo_en_hora_de_peru(client, base_pruebas, sql):
     creado = datetime.fromisoformat(reporte["fecha_creacion"])
     assert abs(creado - ahora_peru) < timedelta(minutes=2)
     assert reporte["codigo"] == f"WR-{creado.year}-{reporte['id_reporte']:06d}"
-    assert datetime.fromisoformat(reporte["historial"][0]["fecha"]) == creado
+    # El historial se inserta después de escribir las fotos: puede caer en el segundo siguiente.
+    fecha_historial = datetime.fromisoformat(reporte["historial"][0]["fecha"])
+    assert timedelta(0) <= fecha_historial - creado <= timedelta(seconds=1)
 
 
 def test_textos_se_recortan_y_autor_es_la_sesion(client, base_pruebas, sql):
