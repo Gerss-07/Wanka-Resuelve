@@ -1,24 +1,29 @@
-import { afterNextRender, Component, ElementRef, inject, Injector, OnDestroy, signal, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, inject, Injector, OnDestroy, signal, viewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { form, FormField, maxLength, minLength, required, validate } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Catalogo } from '../../interfaces/catalogo.interface';
 import { ReporteDatos, ReporteDetalle } from '../../interfaces/reporte.interface';
 import { CatalogoService } from '../../services/catalogo.service';
 import { ReporteService } from '../../services/reporte.service';
 import { AlertaService } from '../../services/alerta.service';
-import { HttpErrorResponse } from '@angular/common/http';
 import { MapaSelector, Punto } from '../mapa-selector/mapa-selector';
 
-export function textoRecortado(min: number, max: number) {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const length = String(control.value ?? '').trim().length;
-    return length >= min && length <= max ? null : { longitud: true };
-  };
-}
+// Textos de la sección 8.
+export const MENSAJES = {
+  categoria: 'Categoría inválida',
+  distrito: 'Distrito inválido',
+  descripcion: 'Describe la incidencia (mínimo 10 caracteres)',
+  referencia: 'Indica una dirección o referencia (mínimo 5 caracteres)',
+  ubicacion: 'Marca la ubicación en el mapa',
+  cantidadFotos: 'Adjunta entre 1 y 3 fotos',
+  foto: 'Cada foto debe ser JPEG o PNG de hasta 2 MB',
+} as const;
+
 export function validarFotos(fotos: File[]): string {
-  if (fotos.length < 1 || fotos.length > 3) return 'Adjunta entre 1 y 3 fotos.';
-  if (fotos.some(f => !['image/jpeg', 'image/png'].includes(f.type) || f.size < 1 || f.size > 2000000)) return 'Cada foto debe ser JPEG o PNG de hasta 2 MB.';
+  if (fotos.length < 1 || fotos.length > 3) return MENSAJES.cantidadFotos;
+  if (fotos.some(f => !['image/jpeg', 'image/png'].includes(f.type) || f.size < 1 || f.size > 2000000)) return MENSAJES.foto;
   return '';
 }
 export async function firmaFotoValida(foto: File): Promise<boolean> {
@@ -29,16 +34,19 @@ export async function firmaFotoValida(foto: File): Promise<boolean> {
   return firma.every((byte, indice) => bytes[indice] === byte);
 }
 interface FotoSeleccionada { archivo: File; url: string }
+/** Los ids van como texto porque un <select> entrega su valor como texto. */
+export interface ModeloReporte { id_categoria: string; id_distrito: string; descripcion: string; referencia: string }
 
-@Component({ selector: 'app-reporte-form', imports: [DecimalPipe, ReactiveFormsModule, RouterLink, MapaSelector], templateUrl: './reporte-form.html' })
+@Component({ selector: 'app-reporte-form', imports: [DecimalPipe, FormField, RouterLink, MapaSelector], templateUrl: './reporte-form.html' })
 export class ReporteForm implements OnDestroy {
-  private fb = inject(FormBuilder); private catalogo = inject(CatalogoService); private api = inject(ReporteService);
+  private catalogo = inject(CatalogoService); private api = inject(ReporteService);
   private alertas = inject(AlertaService); private router = inject(Router); private route = inject(ActivatedRoute);
   private readonly injector = inject(Injector);
   private readonly titulo = viewChild<ElementRef<HTMLElement>>('titulo');
   private destruido = false;
   private readonly idRuta = this.route.snapshot.paramMap.get('id');
   protected readonly id = this.idRuta === null ? null : Number(this.idRuta);
+  protected readonly mensajes = MENSAJES;
   protected categorias = signal<Catalogo[]>([]); protected distritos = signal<Catalogo[]>([]);
   protected cargando = signal(true); protected error = signal(''); protected enviando = signal(false);
   protected errorCatalogos = signal('');
@@ -47,14 +55,36 @@ export class ReporteForm implements OnDestroy {
   protected errorSeleccion = signal('');
   protected errorUbicacion = signal('');
   protected leyendoFotos = signal(false);
-  protected paso = signal<1 | 2>(1); protected intentado = signal(false);
+  protected fotosTocadas = signal(false);
+  protected paso = signal<1 | 2>(1);
   protected punto = signal<Punto | null>(null);
   protected fotos = signal<FotoSeleccionada[]>([]);
   protected creado = signal<ReporteDetalle | null>(null); protected editable = signal(true);
-  protected form = this.fb.nonNullable.group({
-    idCategoria: [0, [Validators.required, Validators.min(1)]], idDistrito: [0, [Validators.required, Validators.min(1)]],
-    descripcion: ['', textoRecortado(10, 1000)], referencia: ['', textoRecortado(5, 255)]
+
+  protected readonly modelo = signal<ModeloReporte>({ id_categoria: '', id_distrito: '', descripcion: '', referencia: '' });
+  protected readonly formulario = form(this.modelo, (esquema) => {
+    required(esquema.id_categoria, { message: MENSAJES.categoria });
+    validate(esquema.id_categoria, ({ value }) => this.fueraDeCatalogo(this.categorias(), value()) ? { kind: 'catalogo', message: MENSAJES.categoria } : undefined);
+    required(esquema.id_distrito, { message: MENSAJES.distrito });
+    validate(esquema.id_distrito, ({ value }) => this.fueraDeCatalogo(this.distritos(), value()) ? { kind: 'catalogo', message: MENSAJES.distrito } : undefined);
+    required(esquema.descripcion, { message: MENSAJES.descripcion });
+    minLength(esquema.descripcion, 10, { message: MENSAJES.descripcion });
+    maxLength(esquema.descripcion, 1000, { message: MENSAJES.descripcion });
+    validate(esquema.descripcion, ({ value }) => soloEspacios(value(), 10) ? { kind: 'recortado', message: MENSAJES.descripcion } : undefined);
+    required(esquema.referencia, { message: MENSAJES.referencia });
+    minLength(esquema.referencia, 5, { message: MENSAJES.referencia });
+    maxLength(esquema.referencia, 255, { message: MENSAJES.referencia });
+    validate(esquema.referencia, ({ value }) => soloEspacios(value(), 5) ? { kind: 'recortado', message: MENSAJES.referencia } : undefined);
   });
+  protected readonly pinValido = computed(() => {
+    const p = this.punto();
+    return !!p && Number.isFinite(p.latitud) && Number.isFinite(p.longitud) && Math.abs(p.latitud) <= 90 && Math.abs(p.longitud) <= 180;
+  });
+  /** Las fotos solo cuentan al crear: en edición no se cambian. */
+  protected readonly fotosValidas = computed(() => this.id !== null || !this.errorFotos());
+  /** Los avisos de pin y fotos aparecen cuando la persona ya empezó a llenar el formulario. */
+  protected readonly mostrarAvisos = computed(() => this.formulario().touched() || this.fotosTocadas());
+
   constructor() { void this.cargar(); }
   protected async cargar(): Promise<void> {
     if (this.id !== null && (!Number.isSafeInteger(this.id) || this.id <= 0)) {
@@ -95,14 +125,18 @@ export class ReporteForm implements OnDestroy {
   }
   private aplicar(r: ReporteDetalle): void {
     this.editable.set(r.estado === 'RECIBIDO');
-    this.form.setValue({ idCategoria:r.categoria.id, idDistrito:r.distrito.id, descripcion:r.descripcion, referencia:r.referencia });
-    this.punto.set({ latitud:r.latitud, longitud:r.longitud });
+    this.modelo.set({ id_categoria: String(r.categoria.id), id_distrito: String(r.distrito.id), descripcion: r.descripcion, referencia: r.referencia });
+    this.punto.set({ latitud: r.latitud, longitud: r.longitud });
+  }
+  private fueraDeCatalogo(lista: Catalogo[], id: string): boolean {
+    return id !== '' && !lista.some(item => String(item.id) === id);
   }
   protected async seleccionarFotos(input: HTMLInputElement): Promise<void> {
     if (this.leyendoFotos()) return;
     const archivos = Array.from(input.files ?? []);
     if (!archivos.length) return;
     input.value = '';
+    this.fotosTocadas.set(true);
     const error = validarFotos([...this.fotos().map(foto => foto.archivo), ...archivos]);
     this.errorSeleccion.set(error);
     if (error) return;
@@ -111,7 +145,7 @@ export class ReporteForm implements OnDestroy {
       const firmas = await Promise.all(archivos.map(firmaFotoValida));
       if (this.destruido) return;
       if (firmas.some(valida => !valida)) {
-        this.errorSeleccion.set('Selecciona archivos JPEG o PNG válidos.');
+        this.errorSeleccion.set(MENSAJES.foto);
         return;
       }
       this.fotos.update(fotos => [...fotos, ...archivos.map(archivo => ({
@@ -144,15 +178,14 @@ export class ReporteForm implements OnDestroy {
       { timeout: 10000 },
     );
   }
-  protected ubicacionValida(): boolean {
-    const p = this.punto(); return !!p && Number.isFinite(p.latitud) && Number.isFinite(p.longitud) && Math.abs(p.latitud) <= 90 && Math.abs(p.longitud) <= 180;
+  protected nombre(lista: Catalogo[], id: string): string { return lista.find(c => String(c.id) === id)?.nombre ?? ''; }
+  protected listo(): boolean {
+    return this.catalogosListos() && !this.formulario().invalid() && this.pinValido() && this.fotosValidas() && !this.leyendoFotos();
   }
-  protected nombre(lista: Catalogo[], id: number): string { return lista.find(c => c.id === Number(id))?.nombre ?? ''; }
-  protected continuar(): void {
+  protected continuar(evento?: Event): void {
+    evento?.preventDefault();
     this.errorEnvio.set('');
-    this.intentado.set(true); this.form.markAllAsTouched();
-    const v = this.form.getRawValue();
-    if (this.leyendoFotos() || !this.catalogosListos() || this.form.invalid || !this.nombre(this.categorias(), v.idCategoria) || !this.nombre(this.distritos(), v.idDistrito) || !this.ubicacionValida() || (!this.id && this.errorFotos())) return;
+    if (!this.listo()) { this.formulario().markAsTouched(); return; }
     if (this.id) void this.guardar(); else this.irAlPaso(2);
   }
   protected irAlPaso(paso: 1 | 2): void {
@@ -162,17 +195,21 @@ export class ReporteForm implements OnDestroy {
   private enfocarTitulo(): void {
     afterNextRender(() => this.titulo()?.nativeElement.focus(), { injector: this.injector });
   }
+  private datos(): ReporteDatos {
+    const v = this.modelo(); const p = this.punto()!;
+    return { idCategoria: Number(v.id_categoria), idDistrito: Number(v.id_distrito), descripcion: v.descripcion, referencia: v.referencia, latitud: p.latitud, longitud: p.longitud };
+  }
   protected async guardar(): Promise<void> {
-    if (!this.catalogosListos() || this.enviando() || !this.editable() || !this.ubicacionValida()) return;
-    const p = this.punto()!; const v = this.form.getRawValue();
-    if (this.form.invalid || !this.nombre(this.categorias(), v.idCategoria) || !this.nombre(this.distritos(), v.idDistrito) || (!this.id && (this.paso() !== 2 || this.errorFotos()))) return;
-    const datos: ReporteDatos = { ...v, idCategoria: Number(v.idCategoria), idDistrito: Number(v.idDistrito), ...p };
+    if (this.enviando() || !this.editable() || !this.listo() || (!this.id && this.paso() !== 2)) return;
     this.enviando.set(true);
     this.errorEnvio.set('');
     try {
-      if (this.id) { const r = await this.api.editar(this.id, datos); void this.alertas.exito('Cambios guardados', 'El reporte se actualizó correctamente.'); await this.router.navigate(['/ciudadano/reportes', r.id]); }
-      else {
-        const r = await this.api.crear(datos, this.fotos().map(foto => foto.archivo));
+      if (this.id) {
+        const r = await this.api.editar(this.id, this.datos());
+        void this.alertas.exito('Cambios guardados', 'El reporte se actualizó correctamente.');
+        await this.router.navigate(['/ciudadano/reportes', r.id]);
+      } else {
+        const r = await this.api.crear(this.datos(), this.fotos().map(foto => foto.archivo));
         this.creado.set(r);
         this.enfocarTitulo();
         void this.alertas.exito('Reporte registrado', `El código asignado es ${r.codigo}.`);
@@ -188,4 +225,9 @@ export class ReporteForm implements OnDestroy {
     this.destruido = true;
     this.fotos().forEach(foto => URL.revokeObjectURL(foto.url));
   }
+}
+
+/** La sección 8 mide el texto recortado: falla si solo alcanza el mínimo gracias a los espacios. */
+function soloEspacios(valor: string, minimo: number): boolean {
+  return valor.length >= minimo && valor.trim().length < minimo;
 }
