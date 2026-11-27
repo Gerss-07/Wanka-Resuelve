@@ -18,7 +18,19 @@ def crear_reporte(
     usuario: CiudadanoDep,
     service: ReporteServiceDep,
     datos: Annotated[ReporteCreate, Form()],
-    fotos: Annotated[list[UploadFile], File(description="De 1 a 3 fotos JPEG o PNG")] = [],
+    fotos: Annotated[
+        list[UploadFile],
+        File(
+            description="De 1 a 3 fotos JPEG o PNG (el mismo campo se repite por cada foto)",
+            # Swagger UI solo muestra selector de archivo con format: binary.
+            # minItems/maxItems documentan el contrato; la validación real está en el servicio.
+            json_schema_extra={
+                "items": {"type": "string", "format": "binary"},
+                "minItems": 1,
+                "maxItems": 3,
+            },
+        ),
+    ] = [],
 ):
     # Se lee como máximo un byte más del límite: si se alcanza, el servicio rechaza la foto.
     contenidos = [foto.file.read(TAMANO_MAXIMO_FOTO + 1) for foto in fotos]
