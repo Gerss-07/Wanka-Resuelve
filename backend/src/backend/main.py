@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from backend.apis.auth import router as auth_router
 from backend.apis.catalogos import router as catalogos_router
 from backend.apis.health import router as health_router
 from backend.apis.operador import router as operador_router
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(health_router)
+app.include_router(auth_router)
 app.include_router(catalogos_router)
 app.include_router(reportes_router)
 app.include_router(operador_router)

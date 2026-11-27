@@ -7,6 +7,7 @@ corrida. Hay una guarda que se niega a continuar si el nombre de esa base no es 
 
 import os
 import re
+import secrets
 import shutil
 import tempfile
 from pathlib import Path
@@ -15,6 +16,10 @@ import pytest
 
 _UPLOADS_TEMPORAL = Path(tempfile.mkdtemp(prefix="wanka_uploads_"))
 os.environ["UPLOADS_DIR"] = str(_UPLOADS_TEMPORAL)
+# Autenticación de prueba: secreto aleatorio por corrida, independiente del .env real.
+os.environ["JWT_SECRETO"] = secrets.token_urlsafe(48)
+os.environ["JWT_EXPIRA_MINUTOS"] = "60"
+os.environ["AUTH_MODO"] = "dev"
 
 from backend.core.config import get_settings  # noqa: E402
 from backend.core.database import connection_scope, get_db  # noqa: E402
