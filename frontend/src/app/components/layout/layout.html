@@ -20,7 +20,7 @@
   <header class="panel-superior">
     <span>Wanka Resuelve <span class="panel-divisor" aria-hidden="true">/</span> {{ operador() ? 'Área del operador' : 'Área ciudadana' }}</span>
     <div class="panel-sesion">
-      @if (dev.activo) {
+      @if (mostrarSelector()) {
         <label class="panel-dev">Actuar como:
           <select #rolDev [value]="dev.rol()" (change)="actuarComo(rolDev.value)">
             <option value="ciudadano">Ciudadano demo</option>
@@ -29,7 +29,10 @@
         </label>
       }
       @if (usuario(); as u) {
-        <span class="panel-persona"><b aria-hidden="true">{{ u.nombre.charAt(0).toUpperCase() }}</b>{{ u.nombre }}</span>
+        <span class="panel-persona"><b aria-hidden="true">{{ u.nombre.charAt(0).toUpperCase() }}</b><span>{{ u.nombre }} <small class="panel-rol">{{ nombreRol() }}</small></span></span>
+      }
+      @if (sesion.estaAutenticado()) {
+        <button type="button" class="f3-secondary panel-salir" (click)="cerrarSesion()">Cerrar sesión</button>
       }
     </div>
   </header>
@@ -38,6 +41,6 @@
   </main>
   <footer class="panel-aviso">
     <span>Simulación académica — no es un canal oficial de emergencias</span>
-    @if (dev.activo) { <span>Identidad temporal de desarrollo</span> }
+    @if (mostrarSelector()) { <span>Identidad temporal de desarrollo</span> }
   </footer>
 </div>

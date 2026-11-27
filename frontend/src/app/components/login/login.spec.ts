@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { Login, MENSAJES_LOGIN } from './login';
 import { AuthService } from '../../services/auth.service';
 import { AlertaService, mensajeError } from '../../services/alerta.service';
 
-async function crear(auth: Partial<AuthService>) {
+async function crear(auth: Partial<AuthService>, query: Record<string, string> = {}) {
   await TestBed.configureTestingModule({
     imports: [Login],
-    providers: [provideRouter([]), { provide: AuthService, useValue: auth }, { provide: AlertaService, useValue: { errorHttp: mensajeError } }],
+    providers: [provideRouter([]), { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap(query) } } }, { provide: AuthService, useValue: auth }, { provide: AlertaService, useValue: { errorHttp: mensajeError } }],
   }).compileComponents();
   const fixture = TestBed.createComponent(Login);
   fixture.detectChanges();
@@ -55,5 +55,21 @@ describe('Login', () => {
     c.modelo.set({ correo: 'op@demo.test', contrasena: 'secreta123' });
     await c.enviar();
     expect(navegar).toHaveBeenCalledWith('/operador/reportes');
+  });
+
+  it('va al destino si el rol puede entrar ahí; si no, a su inicio', async () => {
+    const ciudadano = { iniciarSesion: async () => ({ id: 3, nombre: 'Ana', correo: 'ana@demo.test', rol: 'CIUDADANO' as const }) };
+    let { c } = await crear(ciudadano, { destino: '/ciudadano/reportes/nuevo' });
+    let navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    c.modelo.set({ correo: 'ana@demo.test', contrasena: 'secreta123' });
+    await c.enviar();
+    expect(navegar).toHaveBeenCalledWith('/ciudadano/reportes/nuevo');
+
+    TestBed.resetTestingModule();
+    ({ c } = await crear(ciudadano, { destino: '/operador/reportes' }));
+    navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    c.modelo.set({ correo: 'ana@demo.test', contrasena: 'secreta123' });
+    await c.enviar();
+    expect(navegar).toHaveBeenCalledWith('/ciudadano/reportes');
   });
 });

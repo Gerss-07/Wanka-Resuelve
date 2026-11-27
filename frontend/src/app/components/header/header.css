@@ -42,3 +42,5 @@ nav > a:hover::after, nav > a:focus-visible::after, nav > a.current::after { tra
 @media (prefers-reduced-motion: reduce) {
   nav > a::after, .nav-actions a, .menu-toggle { transition: none; }
 }
+
+.nav-actions button.login-button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid transparent; border-radius: 7px; font: inherit; font-weight: inherit; white-space: nowrap; cursor: pointer; }

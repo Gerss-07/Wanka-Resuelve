@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
-import { afterNextRender, Component, HostListener, inject } from '@angular/core';
+import { afterNextRender, Component, computed, HostListener, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { inicioPorRol, SesionService } from '../../services/sesion.service';
 
 @Component({
   selector: 'app-header',
@@ -13,9 +14,15 @@ export class Header {
   protected seccionActiva = '';
   private readonly documento = inject(DOCUMENT);
   private readonly router = inject(Router);
+  private readonly sesion = inject(SesionService);
+  // La portada se prerenderiza sin sesión; los botones de sesión se muestran después de hidratar.
+  private readonly enNavegador = signal(false);
+  protected readonly conSesion = computed(() => this.enNavegador() && this.sesion.estaAutenticado());
+  protected readonly miPanel = computed(() => { const rol = this.sesion.rol(); return rol ? inicioPorRol(rol) : '/'; });
 
   constructor() {
     afterNextRender(() => {
+      this.enNavegador.set(true);
       const id = this.documento.defaultView?.location.hash.slice(1);
       if (id && this.documento.getElementById(id)) {
         this.desplazar(id);
@@ -43,6 +50,13 @@ export class Header {
       ventana.history.pushState(null, '', `#${id}`);
     }
     this.desplazar(id);
+  }
+
+  protected cerrarSesion(): void {
+    this.menuAbierto = false;
+    // Igual que AuthService.cerrarSesion, sin traer HttpClient a la portada.
+    this.sesion.cerrar();
+    void this.router.navigateByUrl('/');
   }
 
   protected irInicio(evento: MouseEvent): void {

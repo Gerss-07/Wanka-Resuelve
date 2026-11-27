@@ -44,6 +44,8 @@ app-layout .panel-superior {
 }
 app-layout .panel-persona { display: inline-flex; align-items: center; gap: 8px; overflow-wrap: anywhere; }
 app-layout .panel-persona b { display: grid; place-items: center; flex: 0 0 33px; height: 33px; border-radius: 50%; color: var(--panel-blue); background: #eaf1ff; }
+app-layout .panel-rol { display: block; color: var(--panel-muted); font-size: .72rem; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; }
+app-layout .panel-salir { min-height: 36px; padding: .3rem .75rem; font-size: .8rem; }
 app-layout .panel-divisor { margin: 0 .45rem; color: #8493ab; }
 app-layout .panel-sesion { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; }
 app-layout .panel-dev {

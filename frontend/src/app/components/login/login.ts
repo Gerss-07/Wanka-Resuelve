@@ -1,9 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AlertaService } from '../../services/alerta.service';
-import { inicioPorRol } from '../../services/sesion.service';
+import { destinoPermitido, inicioPorRol } from '../../services/sesion.service';
+import { Rol } from '../../interfaces/auth.interface';
 
 export const MENSAJES_LOGIN = {
   correo: 'Correo inválido',
@@ -17,6 +18,7 @@ export class Login {
   private readonly auth = inject(AuthService);
   private readonly alertas = inject(AlertaService);
   private readonly router = inject(Router);
+  private readonly ruta = inject(ActivatedRoute);
   protected readonly visible = signal(false);
   protected readonly enviando = signal(false);
   protected readonly errorEnvio = signal('');
@@ -45,7 +47,9 @@ export class Login {
     }
   }
 
-  protected destino(rol: Parameters<typeof inicioPorRol>[0]): string {
-    return inicioPorRol(rol);
+  /** Va al destino pedido si el rol puede entrar ahí; si no, al inicio de su rol. */
+  protected destino(rol: Rol): string {
+    const destino = this.ruta.snapshot.queryParamMap.get('destino');
+    return destinoPermitido(destino, rol) ? destino : inicioPorRol(rol);
   }
 }

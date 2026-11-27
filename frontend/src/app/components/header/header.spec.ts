@@ -1,9 +1,31 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { Header } from './header';
+import { SesionService } from '../../services/sesion.service';
+import { sesionDePrueba } from '../../services/sesion.service.spec';
 
 describe('Header', () => {
-  beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter([])] }));
+  beforeEach(() => { localStorage.clear(); TestBed.configureTestingModule({ providers: [provideRouter([])] }); });
+
+  it('sin sesión muestra Iniciar sesión y Registrarme; con sesión, Mi panel y Cerrar sesión', async () => {
+    await TestBed.configureTestingModule({ imports: [Header] }).compileComponents();
+    const fixture = TestBed.createComponent(Header);
+    await fixture.whenStable(); fixture.detectChanges();
+    const acciones = () => (fixture.nativeElement as HTMLElement).querySelector('.nav-actions')!.textContent as string;
+    expect(acciones()).toContain('Iniciar sesión');
+    expect(acciones()).toContain('Registrarme');
+    const sesion = TestBed.inject(SesionService);
+    sesion.guardar(sesionDePrueba('OPERADOR'));
+    fixture.detectChanges();
+    expect(acciones()).toContain('Mi panel');
+    expect(acciones()).toContain('Cerrar sesión');
+    expect((fixture.nativeElement as HTMLElement).querySelector('a.register-button')!.getAttribute('href')).toBe('/operador/reportes');
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('button.login-button')!.click();
+    fixture.detectChanges();
+    expect(sesion.estaAutenticado()).toBe(false);
+    expect(acciones()).toContain('Iniciar sesión');
+  });
   it('abre el menú y lo cierra al elegir Iniciar sesión', async () => {
     await TestBed.configureTestingModule({ imports: [Header] }).compileComponents();
     const fixture = TestBed.createComponent(Header);
