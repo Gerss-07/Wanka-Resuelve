@@ -1,0 +1,87 @@
+<a class="f3-back" routerLink="/ciudadano/reportes">← Mis reportes</a>
+@if (id && cargando() && !catalogosListos() && !errorCatalogos()) { <p role="status">Cargando datos…</p> }
+@else if (error()) { <p role="alert">{{ error() }}</p><button class="f3-secondary" (click)="cargar()">Volver a intentar</button> }
+@else if (creado(); as r) {
+  <div class="f3-panel"><p class="f3-eyebrow">REGISTRO COMPLETADO</p><h1 #titulo tabindex="-1">Tu reporte fue registrado</h1><p>El código asignado es <strong>{{ r.codigo }}</strong>.</p><a class="f3-button" [routerLink]="['/ciudadano/reportes',r.id]">Consultar reporte</a></div>
+}
+@else if (!editable()) { <div class="f3-panel"><h1>El reporte ya no se puede editar</h1><p>Solo se pueden modificar reportes en estado RECIBIDO.</p><a class="f3-secondary" [routerLink]="['/ciudadano/reportes',id]">Ver reporte</a></div> }
+@else {
+  <p class="f3-eyebrow">{{ id ? 'EDITAR REPORTE' : 'NUEVO REPORTE · PASO ' + paso() + ' DE 2' }}</p>
+  <h1 #titulo tabindex="-1">{{ id ? 'Editar reporte' : paso() === 1 ? 'Reportar incidencia' : 'Revisa tu reporte' }}</h1>
+  @if (paso() === 1) {
+    <p>Completa los datos para ubicar y describir la incidencia.</p>
+    <form class="f3-panel f3-form" [formGroup]="form" (ngSubmit)="continuar()" novalidate>
+      <div class="f3-form-grid">
+        <div><label for="categoria">Categoría</label><select id="categoria" formControlName="idCategoria" aria-describedby="categoria-ayuda"><option [ngValue]="0">{{ catalogosListos() ? 'Selecciona una categoría' : 'Categorías no disponibles aún' }}</option>@for (c of categorias(); track c.id) { <option [ngValue]="c.id">{{ c.nombre }}</option> }</select>@if (intentado() && !nombre(categorias(), form.controls.idCategoria.value)) { <p id="categoria-ayuda" class="f3-error">Selecciona una categoría válida.</p> }</div>
+        <div><label for="distrito">Distrito</label><select id="distrito" formControlName="idDistrito" aria-describedby="distrito-ayuda"><option [ngValue]="0">{{ catalogosListos() ? 'Selecciona un distrito' : 'Distritos no disponibles aún' }}</option>@for (d of distritos(); track d.id) { <option [ngValue]="d.id">{{ d.nombre }}</option> }</select>@if (intentado() && !nombre(distritos(), form.controls.idDistrito.value)) { <p id="distrito-ayuda" class="f3-error">Selecciona un distrito válido.</p> }</div>
+      </div>
+      @if (cargando()) {
+        <p role="status">Cargando categorías y distritos…</p>
+      } @else if (errorCatalogos()) {
+        <div class="f3-inline-error">
+          <p role="alert">{{ errorCatalogos() }} Puedes completar los demás campos mientras tanto.</p>
+          <button class="f3-secondary" type="button" (click)="cargarCatalogos()">Reintentar catálogos</button>
+        </div>
+      }
+      <div><label for="descripcion">Descripción</label><textarea id="descripcion" formControlName="descripcion" rows="4" maxlength="1000"></textarea>@if ((intentado() || form.controls.descripcion.touched) && form.controls.descripcion.invalid) { <p class="f3-error">Describe la incidencia (entre 10 y 1000 caracteres).</p> }</div>
+      <div><label for="referencia">Dirección o referencia</label><input id="referencia" formControlName="referencia" maxlength="255">@if ((intentado() || form.controls.referencia.touched) && form.controls.referencia.invalid) { <p class="f3-error">Indica una referencia (entre 5 y 255 caracteres).</p> }</div>
+      <div>
+        <label>Ubicación en el mapa</label>
+        <app-mapa-selector [punto]="punto()" (cambio)="seleccionarPunto($event)" />
+        <button class="f3-secondary" type="button" (click)="usarMiUbicacion()">Usar mi ubicación</button>
+        @if (punto(); as p) { <p>{{ p.latitud | number:'1.4-6' }}, {{ p.longitud | number:'1.4-6' }}</p> }
+        @if (errorUbicacion() || (intentado() && !ubicacionValida())) {
+          <p class="f3-error" role="alert">{{ errorUbicacion() || 'Marca la ubicación en el mapa.' }}</p>
+        }
+      </div>
+      @if (!id) {
+        <div class="f3-upload">
+          <label for="fotos">Fotografías</label>
+          <p id="fotos-ayuda">Adjunta de 1 a 3 imágenes JPEG o PNG, de hasta 2 MB cada una.</p>
+          <input #archivos id="fotos" type="file" accept="image/jpeg,image/png" multiple
+            aria-describedby="fotos-ayuda" [disabled]="leyendoFotos()" (change)="seleccionarFotos(archivos)">
+          <p role="status">{{ fotos().length }} de 3 fotografías adjuntas</p>
+          @if (errorSeleccion() || (intentado() && errorFotos())) {
+            <p class="f3-error" role="alert">{{ errorSeleccion() || errorFotos() }}</p>
+          }
+          <div class="f3-photos">
+            @for (foto of fotos(); track foto.url; let i = $index) {
+              <div class="f3-preview">
+                <img [src]="foto.url" [alt]="'Fotografía adjunta ' + (i + 1)">
+                <button class="f3-link-danger" type="button"
+                  [attr.aria-label]="'Quitar fotografía ' + (i + 1)" (click)="quitarFoto(foto)">Quitar</button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      @else { <p>Las fotografías no se pueden editar.</p> }
+      @if (errorEnvio()) { <p class="f3-error" role="alert">{{ errorEnvio() }}</p> }
+      <div><button class="f3-button" type="submit" [disabled]="enviando() || leyendoFotos()">{{ id ? 'Guardar cambios' : 'Continuar al resumen' }}</button></div>
+    </form>
+  } @else {
+    <section class="f3-panel">
+      <h2>Resumen</h2>
+      <dl class="f3-details">
+        <dt>Categoría</dt><dd>{{ nombre(categorias(), form.controls.idCategoria.value) }}</dd>
+        <dt>Distrito</dt><dd>{{ nombre(distritos(), form.controls.idDistrito.value) }}</dd>
+        <dt>Descripción</dt><dd>{{ form.controls.descripcion.value.trim() }}</dd>
+        <dt>Referencia</dt><dd>{{ form.controls.referencia.value.trim() }}</dd>
+        <dt>Ubicación</dt><dd>{{ punto()?.latitud | number:'1.4-6' }}, {{ punto()?.longitud | number:'1.4-6' }}</dd>
+      </dl>
+      <h2>Fotografías</h2>
+      <div class="f3-photos">
+        @for (foto of fotos(); track foto.url; let i = $index) {
+          <img [src]="foto.url" [alt]="'Fotografía adjunta ' + (i + 1)">
+        }
+      </div>
+      @if (errorEnvio()) { <p class="f3-error" role="alert">{{ errorEnvio() }}</p> }
+      <div class="f3-actions">
+        <button class="f3-secondary" type="button" (click)="irAlPaso(1)" [disabled]="enviando()">Volver a editar</button>
+        <button class="f3-button" type="button" (click)="guardar()" [disabled]="enviando()">
+          {{ enviando() ? 'Enviando…' : 'Confirmar reporte' }}
+        </button>
+      </div>
+    </section>
+  }
+}

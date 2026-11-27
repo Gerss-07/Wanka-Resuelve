@@ -1,0 +1,34 @@
+<header><a routerLink="/">Wanka Resuelve</a><nav><a routerLink="/ciudadano/reportes">Mis reportes</a><a routerLink="/ciudadano/reportes/nuevo">Nuevo reporte</a></nav></header>
+<main>
+  @if (desarrollo) { <p class="aviso">Desarrollo: ciudadano ID 2 seleccionado automáticamente. No es una sesión autenticada.</p> }
+  @else { <p class="aviso">El acceso de desarrollo está deshabilitado en esta compilación.</p> }
+  @if (nuevo) {
+    <h1>Registrar incidencia</h1><p>Completa la información y adjunta de una a tres fotografías.</p>
+    @if (cargando) { <p role="status">Cargando categorías y distritos…</p> }
+    @if (error) { <p class="error" role="alert">{{ error }}</p> }
+    @if (mensaje) {
+      <p role="status">{{ mensaje }}</p>
+      <a class="boton" routerLink="/ciudadano/reportes">Ver mis reportes</a>
+    } @else if (!cargando && categorias.length && distritos.length) {
+      <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+        <label for="categoria">Categoría</label><select id="categoria" formControlName="id_categoria"><option value="">Seleccionar</option>@for (categoria of categorias; track categoria.id_categoria) { <option [value]="categoria.id_categoria">{{ categoria.nombre }}</option> }</select>
+        <label for="distrito">Distrito</label><select id="distrito" formControlName="id_distrito"><option value="">Seleccionar</option>@for (distrito of distritos; track distrito.id_distrito) { <option [value]="distrito.id_distrito">{{ distrito.nombre }}</option> }</select>
+        <label for="descripcion">Descripción</label><textarea id="descripcion" formControlName="descripcion" maxlength="1000" rows="4"></textarea><small>Entre 10 y 1000 caracteres.</small>
+        <label for="referencia">Referencia de ubicación</label><input id="referencia" formControlName="referencia" maxlength="255"><small>Entre 5 y 255 caracteres.</small>
+        <button type="button" class="secundario" (click)="ubicacion()">Usar mi ubicación</button>
+        <label for="latitud">Latitud</label><input id="latitud" type="number" step="0.000001" min="-90" max="90" formControlName="latitud">
+        <label for="longitud">Longitud</label><input id="longitud" type="number" step="0.000001" min="-180" max="180" formControlName="longitud">
+        <label for="fotos">Fotografías</label><input id="fotos" type="file" multiple accept="image/jpeg,image/png" (change)="fotos($event)"><small>JPG o PNG, máximo 2 MB cada una.</small>
+        <button type="submit" [disabled]="enviando">{{ enviando ? 'Enviando…' : 'Enviar reporte' }}</button>
+      </form>
+    }
+  } @else {
+    <div class="titulo"><div><h1>Mis reportes</h1><p>Incidencias registradas para el ciudadano seleccionado.</p></div><a class="boton" routerLink="/ciudadano/reportes/nuevo">Registrar incidencia</a></div>
+    @if (cargando) { <p role="status">Cargando reportes…</p> }
+    @if (error) { <p class="error" role="alert">{{ error }}</p> }
+    @if (!cargando && !error) {
+      @for (reporte of reportes; track reporte.id_reporte) { <article><strong>{{ reporte.codigo }}</strong><span>{{ reporte.categoria.nombre }} · {{ reporte.distrito.nombre }}</span><span>{{ reporte.estado }} · {{ reporte.fecha_creacion | date:'dd/MM/yyyy' }}</span></article> }
+      @empty { <p>No hay incidencias registradas.</p> }
+    }
+  }
+</main>
