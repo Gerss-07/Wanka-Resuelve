@@ -40,6 +40,18 @@ class CatalogoRepository:
             (id_categoria,),
         )
 
+    def obtener_entidad(self, id_entidad: int) -> dict | None:
+        cursor = self.connection.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                "SELECT id_entidad, nombre, id_categoria FROM entidad_responsable "
+                "WHERE id_entidad = %s",
+                (id_entidad,),
+            )
+            return cursor.fetchone()
+        finally:
+            cursor.close()
+
     def existe_categoria(self, id_categoria: int) -> bool:
         return self._existe("SELECT 1 FROM categoria WHERE id_categoria = %s", (id_categoria,))
 

@@ -1,6 +1,6 @@
 """Contratos de entrada y salida de reportes (secciones 7 y 8)."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -28,6 +28,10 @@ MENSAJES_CAMPO = {
     "latitud": "Marca la ubicación en el mapa",
     "longitud": "Marca la ubicación en el mapa",
     "fotos": MENSAJE_FOTOS_CANTIDAD,
+    "prioridad": "Prioridad inválida",
+    "id_entidad": "La entidad no atiende la categoría del reporte",
+    "motivo": "Indica el motivo del rechazo (mínimo 10 caracteres)",
+    "comentario_solucion": "Describe la solución (mínimo 10 caracteres)",
 }
 
 
@@ -46,6 +50,49 @@ class ReporteCreate(BaseModel):
 
 class ReporteUpdate(ReporteCreate):
     """Campos editables en RECIBIDO (RR-04); las fotos no se editan."""
+
+
+class ReporteFiltros(BaseModel):
+    """Filtros opcionales de la bandeja del operador (fechas AAAA-MM-DD)."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    estado: Estado | None = None
+    id_categoria: int | None = Field(default=None, gt=0)
+    id_distrito: int | None = Field(default=None, gt=0)
+    fecha_desde: date | None = None
+    fecha_hasta: date | None = None
+
+
+class ReporteAsignar(BaseModel):
+    """RR-06: prioridad manual y entidad de la misma categoría del reporte."""
+
+    prioridad: Prioridad
+    id_entidad: int = Field(gt=0)
+
+
+class ReporteRechazar(BaseModel):
+    """RR-07: motivo obligatorio; se guarda en historial_estado.comentario."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    motivo: str = Field(min_length=10, max_length=500)
+
+
+class ReporteIniciarAtencion(BaseModel):
+    """RR-08: comentario opcional (vacío se guarda como NULL)."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    comentario: str | None = Field(default=None, max_length=1000)
+
+
+class ReporteCerrar(BaseModel):
+    """RR-09: comentario de solución obligatorio; se guarda en historial_estado.comentario."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    comentario_solucion: str = Field(min_length=10, max_length=1000)
 
 
 class UsuarioReferencia(BaseModel):

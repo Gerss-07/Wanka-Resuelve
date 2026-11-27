@@ -267,7 +267,7 @@ La base es `http://localhost:8000`. El backend y el frontend se implementan cont
 | Método | Ruta | Rol | Entrada | Respuesta OK | Errores |
 | --- | --- | --- | --- | --- | --- |
 | POST | `/auth/registro` | Público | `{nombre, correo, contrasena}` | `201` `Usuario` | `409` correo ya registrado, `422` |
-| POST | `/auth/login` | Público | `{correo, contrasena}` | `200` `{access_token, token_type: "bearer", usuario: Usuario}` | `401` «Credenciales inválidas» |
+| POST | `/auth/login` | Público | `{correo, contrasena}` | `200` `{access_token, token_type: "bearer", expires_in, usuario: Usuario}` | `401` «Credenciales inválidas» |
 | GET | `/auth/me` | Autenticado | — | `200` `Usuario` | `401` |
 
 **Catálogos**
