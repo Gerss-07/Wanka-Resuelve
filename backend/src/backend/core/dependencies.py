@@ -3,7 +3,8 @@
 from collections.abc import Callable
 from typing import Annotated
 
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from mysql.connector import MySQLConnection
 
 from backend.core.config import get_settings
@@ -49,20 +50,33 @@ def get_auth_service(connection: DbDep) -> AuthService:
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 
 
+_bearer = HTTPBearer(auto_error=False, description="Token JWT obtenido en POST /auth/login")
+
+
 def get_current_user(
-    service: UsuarioServiceDep,
-    x_dev_usuario_id: Annotated[str | None, Header(description="Temporal, solo con AUTH_MODO=dev (se elimina en F5)")] = None,
+    request: Request,
+    service: AuthServiceDep,
+    credenciales: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
+    x_dev_usuario_id: Annotated[
+        str | None,
+        Header(description="Temporal, solo con AUTH_MODO=dev y sin Authorization (se elimina en F5-B)"),
+    ] = None,
 ) -> Usuario:
     """Usuario de la sesión.
 
-    Modo temporal (AUTH_MODO=dev): se toma de la cabecera X-Dev-Usuario-Id.
-    En la fase 5 solo cambia el interior de esta función (JWT).
+    1. Si llega la cabecera Authorization, debe ser «Bearer <token>» válido (si no, 401).
+    2. Si no llega y AUTH_MODO=dev, se usa X-Dev-Usuario-Id (modo temporal).
+    3. En cualquier otro caso, 401.
     """
-    if get_settings().auth_modo != "dev":
-        raise NoAutorizado("No autenticado")
-    if x_dev_usuario_id is None or not x_dev_usuario_id.strip().isdigit():
-        raise NoAutorizado("No autenticado")
-    return service.obtener_usuario_sesion(int(x_dev_usuario_id))
+    if "authorization" in request.headers:
+        if credenciales is None or not credenciales.credentials:
+            raise NoAutorizado("No autenticado")
+        return service.usuario_por_token(credenciales.credentials)
+    if get_settings().auth_modo == "dev" and x_dev_usuario_id is not None:
+        valor = x_dev_usuario_id.strip()
+        if valor.isdigit():
+            return service.usuario_dev(int(valor))
+    raise NoAutorizado("No autenticado")
 
 
 CurrentUserDep = Annotated[Usuario, Depends(get_current_user)]
