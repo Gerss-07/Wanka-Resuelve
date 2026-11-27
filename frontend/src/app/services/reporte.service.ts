@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ReporteDatos, ReporteDatosApi, ReporteDetalle, ReporteDetalleApi, ReporteResumen, ReporteResumenApi } from '../interfaces/reporte.interface';
@@ -7,8 +7,6 @@ import { ReporteDatos, ReporteDatosApi, ReporteDetalle, ReporteDetalleApi, Repor
 export class ReporteService {
   private http = inject(HttpClient);
   private url = `${environment.apiUrl}/reportes`;
-  private readonly nombre = signal('');
-  readonly ciudadano = this.nombre.asReadonly();
   private resumenDesdeApi(r: ReporteResumenApi): ReporteResumen {
     return { id: r.id_reporte, codigo: r.codigo, ciudadano: r.ciudadano.nombre, categoria: { id: r.categoria.id_categoria, nombre: r.categoria.nombre }, distrito: { id: r.distrito.id_distrito, nombre: r.distrito.nombre }, estado: r.estado, prioridad: r.prioridad, fechaCreacion: r.fecha_creacion };
   }
@@ -20,7 +18,6 @@ export class ReporteService {
   }
   async listar(): Promise<ReporteResumen[]> {
     const reportes = await firstValueFrom(this.http.get<ReporteResumenApi[]>(`${this.url}/mis-reportes`));
-    this.nombre.set(reportes[0]?.ciudadano.nombre ?? '');
     return reportes.map(r => this.resumenDesdeApi(r));
   }
   async obtener(id: number): Promise<ReporteDetalle> { return this.desdeApi(await firstValueFrom(this.http.get<ReporteDetalleApi>(`${this.url}/${id}`))); }

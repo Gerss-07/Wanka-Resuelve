@@ -3,26 +3,43 @@
   <a class="panel-marca" routerLink="/" aria-label="Portada de Wanka Resuelve">
     <img src="/images/logo-wanka-resuelve.png" width="156" alt="Wanka Resuelve">
   </a>
-  <nav aria-label="Navegación ciudadana">
-    <p>Área ciudadana</p>
-    <a routerLink="/ciudadano" routerLinkActive="actual" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page"><svg lucideHouse aria-hidden="true" [size]="19"></svg>Inicio</a>
-    <a routerLink="/ciudadano/reportes" routerLinkActive="actual" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page"><svg lucideClipboardList aria-hidden="true" [size]="19"></svg>Mis reportes</a>
-    <a routerLink="/ciudadano/reportes/nuevo" routerLinkActive="actual" ariaCurrentWhenActive="page"><svg lucidePlusCircle aria-hidden="true" [size]="19"></svg>Nuevo reporte</a>
-    <a routerLink="/ciudadano/seguimiento" routerLinkActive="actual" ariaCurrentWhenActive="page"><svg lucideMapPin aria-hidden="true" [size]="19"></svg>Seguimiento</a>
-  </nav>
+  @if (operador()) {
+    <nav aria-label="Navegación del operador">
+      <p>Área del operador</p>
+      <a routerLink="/operador/reportes" routerLinkActive="actual" ariaCurrentWhenActive="page"><svg lucideClipboardList aria-hidden="true" [size]="19"></svg>Bandeja</a>
+    </nav>
+  } @else {
+    <nav aria-label="Navegación ciudadana">
+      <p>Área ciudadana</p>
+      <a routerLink="/ciudadano" routerLinkActive="actual" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page"><svg lucideHouse aria-hidden="true" [size]="19"></svg>Inicio</a>
+      <a routerLink="/ciudadano/reportes" routerLinkActive="actual" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page"><svg lucideClipboardList aria-hidden="true" [size]="19"></svg>Mis reportes</a>
+      <a routerLink="/ciudadano/reportes/nuevo" routerLinkActive="actual" ariaCurrentWhenActive="page"><svg lucidePlusCircle aria-hidden="true" [size]="19"></svg>Nuevo reporte</a>
+      <a routerLink="/ciudadano/seguimiento" routerLinkActive="actual" ariaCurrentWhenActive="page"><svg lucideMapPin aria-hidden="true" [size]="19"></svg>Seguimiento</a>
+    </nav>
+  }
 </aside>
 <div class="panel-area">
   <header class="panel-superior">
-    <span>Wanka Resuelve <span class="panel-divisor" aria-hidden="true">/</span> Área ciudadana</span>
-    @if (ciudadano(); as nombre) {
-      <span class="panel-persona"><b aria-hidden="true">{{ nombre.charAt(0).toUpperCase() }}</b>{{ nombre }}</span>
-    }
+    <span>Wanka Resuelve <span class="panel-divisor" aria-hidden="true">/</span> {{ operador() ? 'Área del operador' : 'Área ciudadana' }}</span>
+    <div class="panel-sesion">
+      @if (dev.activo) {
+        <label class="panel-dev">Actuar como:
+          <select #rolDev [value]="dev.rol()" (change)="actuarComo(rolDev.value)">
+            <option value="ciudadano">Ciudadano demo</option>
+            <option value="operador">Operador</option>
+          </select>
+        </label>
+      }
+      @if (usuario(); as u) {
+        <span class="panel-persona"><b aria-hidden="true">{{ u.nombre.charAt(0).toUpperCase() }}</b>{{ u.nombre }}</span>
+      }
+    </div>
   </header>
   <main id="contenido-ciudadano" tabindex="-1">
     <router-outlet />
   </main>
   <footer class="panel-aviso">
     <span>Simulación académica — no es un canal oficial de emergencias</span>
-    @if (modoDesarrollo) { <span>Identidad temporal de desarrollo</span> }
+    @if (dev.activo) { <span>Identidad temporal de desarrollo</span> }
   </footer>
 </div>
