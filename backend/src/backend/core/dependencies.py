@@ -15,6 +15,7 @@ from backend.repositories.historial import HistorialRepository
 from backend.repositories.reportes import ReporteRepository
 from backend.repositories.usuarios import UsuarioRepository
 from backend.schemas.auth import Usuario
+from backend.services.auth import AuthService
 from backend.services.catalogos import CatalogoService
 from backend.services.exceptions import NoAutorizado, SinPermiso
 from backend.services.fotos import FotoService
@@ -39,6 +40,13 @@ def get_usuario_service(connection: DbDep) -> UsuarioService:
 
 
 UsuarioServiceDep = Annotated[UsuarioService, Depends(get_usuario_service)]
+
+
+def get_auth_service(connection: DbDep) -> AuthService:
+    return AuthService(UsuarioRepository(connection))
+
+
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 
 
 def get_current_user(

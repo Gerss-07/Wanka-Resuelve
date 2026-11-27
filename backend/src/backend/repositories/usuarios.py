@@ -1,9 +1,22 @@
 """Persistencia parametrizada de usuarios."""
 
+from dataclasses import dataclass
+
 from mysql.connector import MySQLConnection
 from mysql.connector import IntegrityError
 
 from backend.services.exceptions import Conflicto
+
+
+@dataclass(frozen=True)
+class UsuarioRecord:
+    """Fila interna con el hash; nunca sale del servicio ni llega a la API."""
+
+    id_usuario: int
+    nombre: str
+    correo: str
+    rol: str
+    contrasena_hash: str
 
 
 class UsuarioRepository:
@@ -15,6 +28,18 @@ class UsuarioRepository:
         try:
             cursor.execute("SELECT id_usuario, rol FROM usuario WHERE correo = %s", (correo,))
             return cursor.fetchone()
+        finally:
+            cursor.close()
+
+    def buscar_credenciales(self, correo: str) -> UsuarioRecord | None:
+        cursor = self.connection.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                "SELECT id_usuario, nombre, correo, rol, contrasena_hash FROM usuario WHERE correo = %s",
+                (correo,),
+            )
+            fila = cursor.fetchone()
+            return UsuarioRecord(**fila) if fila else None
         finally:
             cursor.close()
 

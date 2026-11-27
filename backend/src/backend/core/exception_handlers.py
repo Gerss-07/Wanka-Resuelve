@@ -4,11 +4,14 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from backend.schemas.auth import MENSAJES_AUTH
 from backend.schemas.reportes import MENSAJES_CAMPO
-
 from backend.services.exceptions import (
     Conflicto, DatosInvalidos, DomainError, NoAutorizado, NoEncontrado, SinPermiso,
 )
+
+
+MENSAJES_VALIDACION = {**MENSAJES_CAMPO, **MENSAJES_AUTH}
 
 
 def register_exception_handlers(app: FastAPI) -> None:
@@ -39,7 +42,7 @@ def register_exception_handlers(app: FastAPI) -> None:
                 campo = loc[1]
             else:
                 campo = loc[-1] if loc else None
-            if campo in MENSAJES_CAMPO:
-                mensaje = MENSAJES_CAMPO[campo]
+            if campo in MENSAJES_VALIDACION:
+                mensaje = MENSAJES_VALIDACION[campo]
                 break
         return JSONResponse(status_code=422, content={"detail": mensaje})
