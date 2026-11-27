@@ -1,22 +1,43 @@
 """Reglas del operador: bandeja y transiciones (RR-06 a RR-09, RR-11, RR-12)."""
 
+from backend.repositories.asignaciones import AsignacionRepository
+from backend.repositories.catalogos import CatalogoRepository
 from backend.repositories.historial import HistorialRepository
 from backend.repositories.reportes import ReporteRepository
 from backend.schemas.auth import Usuario
-from backend.schemas.reportes import ReporteDetalle, ReporteFiltros, ReporteResumen
-from backend.services.exceptions import Conflicto, NoEncontrado
+from backend.schemas.reportes import (
+    MENSAJES_CAMPO, ReporteAsignar, ReporteDetalle, ReporteFiltros, ReporteResumen,
+)
+from backend.services.exceptions import Conflicto, DatosInvalidos, NoEncontrado
 from backend.services.reportes import MENSAJE_ESTADO, MENSAJE_NO_ENCONTRADO, ReporteService
+
+
+RECIBIDO = "RECIBIDO"
+ASIGNADO = "ASIGNADO"
 
 
 class OperadorService:
     def __init__(self, repository: ReporteRepository, historial: HistorialRepository,
+                 asignaciones: AsignacionRepository, catalogos: CatalogoRepository,
                  lector: ReporteService):
         self.repository = repository
         self.historial = historial
+        self.asignaciones = asignaciones
+        self.catalogos = catalogos
         self.lector = lector
 
     def bandeja(self, filtros: ReporteFiltros) -> list[ReporteResumen]:
         return [self.lector.resumen(fila) for fila in self.repository.listar(filtros)]
+
+    def asignar(self, operador: Usuario, id_reporte: int, datos: ReporteAsignar) -> ReporteDetalle:
+        """RR-06: RECIBIDO → ASIGNADO con prioridad y entidad de la misma categoría."""
+        reporte = self._reporte_en_estado(id_reporte, RECIBIDO)
+        entidad = self.catalogos.obtener_entidad(datos.id_entidad)
+        if entidad is None or entidad["id_categoria"] != reporte["id_categoria"]:
+            raise DatosInvalidos(MENSAJES_CAMPO["id_entidad"])
+        self._transicion(operador, id_reporte, RECIBIDO, ASIGNADO)
+        self.asignaciones.insertar(id_reporte, datos.id_entidad, datos.prioridad)
+        return self._detalle(id_reporte)
 
     # ----- reglas comunes -----
 

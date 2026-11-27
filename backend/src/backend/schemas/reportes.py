@@ -28,6 +28,8 @@ MENSAJES_CAMPO = {
     "latitud": "Marca la ubicación en el mapa",
     "longitud": "Marca la ubicación en el mapa",
     "fotos": MENSAJE_FOTOS_CANTIDAD,
+    "prioridad": "Prioridad inválida",
+    "id_entidad": "La entidad no atiende la categoría del reporte",
 }
 
 
@@ -58,6 +60,13 @@ class ReporteFiltros(BaseModel):
     id_distrito: int | None = Field(default=None, gt=0)
     fecha_desde: date | None = None
     fecha_hasta: date | None = None
+
+
+class ReporteAsignar(BaseModel):
+    """RR-06: prioridad manual y entidad de la misma categoría del reporte."""
+
+    prioridad: Prioridad
+    id_entidad: int = Field(gt=0)
 
 
 class UsuarioReferencia(BaseModel):

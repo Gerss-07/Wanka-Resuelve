@@ -8,6 +8,7 @@ from mysql.connector import MySQLConnection
 
 from backend.core.config import get_settings
 from backend.core.database import get_db
+from backend.repositories.asignaciones import AsignacionRepository
 from backend.repositories.catalogos import CatalogoRepository
 from backend.repositories.fotos import FotoRepository
 from backend.repositories.historial import HistorialRepository
@@ -97,6 +98,8 @@ def get_operador_service(connection: DbDep) -> OperadorService:
     return OperadorService(
         ReporteRepository(connection),
         HistorialRepository(connection),
+        AsignacionRepository(connection),
+        CatalogoRepository(connection),
         get_reporte_service(connection),
     )
 
