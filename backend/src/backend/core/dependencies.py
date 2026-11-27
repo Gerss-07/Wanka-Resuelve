@@ -18,6 +18,7 @@ from backend.services.catalogos import CatalogoService
 from backend.services.exceptions import NoAutorizado, SinPermiso
 from backend.services.fotos import FotoService
 from backend.services.health import HealthService
+from backend.services.operador import OperadorService
 from backend.services.reportes import ReporteService
 from backend.services.usuarios import UsuarioService
 
@@ -90,3 +91,14 @@ def get_reporte_service(connection: DbDep) -> ReporteService:
 
 
 ReporteServiceDep = Annotated[ReporteService, Depends(get_reporte_service)]
+
+
+def get_operador_service(connection: DbDep) -> OperadorService:
+    return OperadorService(
+        ReporteRepository(connection),
+        HistorialRepository(connection),
+        get_reporte_service(connection),
+    )
+
+
+OperadorServiceDep = Annotated[OperadorService, Depends(get_operador_service)]

@@ -1,6 +1,6 @@
 """Contratos de entrada y salida de reportes (secciones 7 y 8)."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -46,6 +46,18 @@ class ReporteCreate(BaseModel):
 
 class ReporteUpdate(ReporteCreate):
     """Campos editables en RECIBIDO (RR-04); las fotos no se editan."""
+
+
+class ReporteFiltros(BaseModel):
+    """Filtros opcionales de la bandeja del operador (fechas AAAA-MM-DD)."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    estado: Estado | None = None
+    id_categoria: int | None = Field(default=None, gt=0)
+    id_distrito: int | None = Field(default=None, gt=0)
+    fecha_desde: date | None = None
+    fecha_hasta: date | None = None
 
 
 class UsuarioReferencia(BaseModel):

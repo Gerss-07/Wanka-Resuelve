@@ -90,6 +90,18 @@ class ReporteService:
             raise Conflicto(MENSAJE_ESTADO)
         self.archivos.borrar(rutas)
 
+    # ----- lectura compartida con el operador -----
+
+    def detalle(self, id_reporte: int) -> ReporteDetalle:
+        """Detalle sin control de propiedad (lo usa el operador, que ve todos)."""
+        fila = self.repository.obtener(id_reporte)
+        if fila is None:
+            raise NoEncontrado(MENSAJE_NO_ENCONTRADO)
+        return self._detalle(fila)
+
+    def resumen(self, fila: dict) -> ReporteResumen:
+        return self._resumen(fila)
+
     # ----- reglas auxiliares -----
 
     def _validar_catalogos(self, datos: ReporteCreate) -> None:

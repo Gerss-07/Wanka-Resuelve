@@ -2,7 +2,7 @@
 
 from mysql.connector import MySQLConnection
 
-from backend.schemas.reportes import ReporteCreate
+from backend.schemas.reportes import ReporteCreate, ReporteFiltros
 
 
 _SELECT_REPORTE = """
@@ -66,6 +66,48 @@ class ReporteRepository:
                 (id_ciudadano,),
             )
             return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def listar(self, filtros: ReporteFiltros) -> list[dict]:
+        """Bandeja: cláusulas fijas (lista permitida) y valores siempre parametrizados."""
+        clausulas: list[str] = []
+        params: list = []
+        if filtros.estado is not None:
+            clausulas.append("r.estado = %s")
+            params.append(filtros.estado)
+        if filtros.id_categoria is not None:
+            clausulas.append("r.id_categoria = %s")
+            params.append(filtros.id_categoria)
+        if filtros.id_distrito is not None:
+            clausulas.append("r.id_distrito = %s")
+            params.append(filtros.id_distrito)
+        if filtros.fecha_desde is not None:
+            clausulas.append("r.fecha_creacion >= %s")
+            params.append(filtros.fecha_desde)
+        if filtros.fecha_hasta is not None:
+            clausulas.append("r.fecha_creacion < DATE_ADD(%s, INTERVAL 1 DAY)")
+            params.append(filtros.fecha_hasta)
+        where = (" WHERE " + " AND ".join(clausulas)) if clausulas else ""
+        cursor = self.connection.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                _SELECT_REPORTE + where + " ORDER BY r.fecha_creacion DESC, r.id_reporte DESC",
+                tuple(params),
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def cambiar_estado(self, id_reporte: int, estado_origen: str, estado_nuevo: str) -> int:
+        """Transición segura: solo cambia si sigue en el estado de origen; devuelve rowcount."""
+        cursor = self.connection.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                "UPDATE reporte SET estado = %s WHERE id_reporte = %s AND estado = %s",
+                (estado_nuevo, id_reporte, estado_origen),
+            )
+            return cursor.rowcount
         finally:
             cursor.close()
 
