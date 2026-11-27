@@ -39,7 +39,7 @@ app-layout {
     .panel-marca { margin: 0 0 5px; }
     .panel-marca img { width: 116px; }
     .panel-superior { min-height: 0; }
-    nav { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; }
+    nav { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 3px; }
     nav p { display: none; }
     nav a { flex-direction: column; justify-content: center; text-align: center; gap: 4px; padding: 5px 1px; font-size: clamp(.65rem, 2.45vw, .8rem); }
   }

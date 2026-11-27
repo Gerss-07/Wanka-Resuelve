@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, signal, ViewEncapsulation } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { LucideClipboardList, LucideHouse, LucideMapPin, LucidePlusCircle } from '@lucide/angular';
+import { LucideClipboardList, LucidePlusCircle } from '@lucide/angular';
 import { Usuario } from '../../interfaces/auth.interface';
 import { AuthService } from '../../services/auth.service';
 import { ModoDevService, RolDev } from '../../services/modo-dev.service';
@@ -9,7 +9,7 @@ const INICIO_POR_ROL: Record<RolDev, string> = { ciudadano: '/ciudadano/reportes
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideHouse, LucideClipboardList, LucidePlusCircle, LucideMapPin],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideClipboardList, LucidePlusCircle],
   templateUrl: './layout.html',
   styleUrls: ['./layout.scss', './panel.scss'],
   encapsulation: ViewEncapsulation.None,

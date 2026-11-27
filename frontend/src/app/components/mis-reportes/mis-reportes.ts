@@ -1,31 +1,22 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { LucideArrowRight, LucideMapPin, LucidePlus } from '@lucide/angular';
+import { RouterLink } from '@angular/router';
+import { LucidePlus } from '@lucide/angular';
 import { EstadoBadge } from '../estado-badge/estado-badge';
 import { ReporteResumen } from '../../interfaces/reporte.interface';
 import { ReporteService } from '../../services/reporte.service';
 import { AlertaService } from '../../services/alerta.service';
-import { estadosReporte, ResumenReportes } from './resumen-reportes';
 
 @Component({
   selector: 'app-mis-reportes',
-  imports: [DatePipe, RouterLink, EstadoBadge, ResumenReportes, LucideArrowRight, LucideMapPin, LucidePlus],
+  imports: [DatePipe, RouterLink, EstadoBadge, LucidePlus],
   templateUrl: './mis-reportes.html',
 })
 export class MisReportes {
   private api = inject(ReporteService); private alertas = inject(AlertaService);
-  private readonly ruta = inject(ActivatedRoute);
-  protected readonly inicio = this.ruta.snapshot.data['vista'] === 'inicio';
-  protected readonly seguimiento = this.ruta.snapshot.data['vista'] === 'seguimiento';
-  protected readonly estados = estadosReporte;
-  protected readonly filtro = signal('');
   protected reportes = signal<ReporteResumen[]>([]); protected cargando = signal(true); protected error = signal(''); protected eliminando = signal<number | null>(null);
-  protected readonly visibles = computed(() => {
-    const ordenados = [...this.reportes()].sort((a, b) => b.fechaCreacion.localeCompare(a.fechaCreacion) || b.id - a.id);
-    if (this.inicio) return ordenados.slice(0, 5);
-    return ordenados.filter(r => !this.filtro() || r.estado === this.filtro());
-  });
+  protected readonly visibles = computed(() =>
+    [...this.reportes()].sort((a, b) => b.fechaCreacion.localeCompare(a.fechaCreacion) || b.id - a.id));
   constructor() { void this.cargar(); }
   protected async cargar(): Promise<void> {
     this.cargando.set(true); this.error.set('');

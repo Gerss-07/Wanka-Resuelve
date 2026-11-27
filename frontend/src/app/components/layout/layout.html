@@ -11,10 +11,8 @@
   } @else {
     <nav aria-label="Navegación ciudadana">
       <p>Área ciudadana</p>
-      <a routerLink="/ciudadano" routerLinkActive="actual" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page"><svg lucideHouse aria-hidden="true" [size]="19"></svg>Inicio</a>
       <a routerLink="/ciudadano/reportes" routerLinkActive="actual" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page"><svg lucideClipboardList aria-hidden="true" [size]="19"></svg>Mis reportes</a>
       <a routerLink="/ciudadano/reportes/nuevo" routerLinkActive="actual" ariaCurrentWhenActive="page"><svg lucidePlusCircle aria-hidden="true" [size]="19"></svg>Nuevo reporte</a>
-      <a routerLink="/ciudadano/seguimiento" routerLinkActive="actual" ariaCurrentWhenActive="page"><svg lucideMapPin aria-hidden="true" [size]="19"></svg>Seguimiento</a>
     </nav>
   }
 </aside>

@@ -5,14 +5,7 @@ app-layout {
   .f3-heading { margin-bottom: 20px; }
   .f3-heading p:not(.f3-eyebrow), .f3-listado-header p { color: var(--panel-muted); margin-bottom: 0; }
   .f3-eyebrow { margin: 0; color: #006f72; font-size: .71rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-  .panel-portada {
-    padding: clamp(18px, 2.6vw, 30px);
-    background: linear-gradient(90deg, #e9f2ff 34%, #e9f2ffed 67%, #e9f2ff86), url('/images/valle-mantaro.jpg') right 50% / 57% auto no-repeat, #e9f2ff;
-    border: 1px solid #d8e6fb;
-    border-radius: 15px;
-  }
-  .panel-cobertura { display: inline-flex; align-items: center; gap: 7px; margin-top: 13px; color: #19558a; font-size: .8rem; font-weight: 750; }
-  .panel-link, .f3-back { display: inline-flex; align-items: center; gap: 6px; color: #184caf; font-size: .88rem; font-weight: 800; }
+  .f3-back { display: inline-flex; align-items: center; gap: 6px; color: #184caf; font-size: .88rem; font-weight: 800; }
   .f3-back { margin-bottom: 20px; }
   .f3-button, .f3-secondary {
     display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 8px;
@@ -28,8 +21,7 @@ app-layout {
   .f3-panel h2 { font-size: 1.13rem; line-height: 1.3; margin: 0 0 .6rem; letter-spacing: -.02em; }
   .f3-listado-header { align-items: flex-start; margin-bottom: 13px; }
   .f3-listado-header h2 { margin-bottom: 3px; }
-  .f3-listado-header p, .f3-filtro { font-size: .85rem; }
-  .f3-filtro { display: flex; align-items: center; gap: 8px; font-weight: 750; }
+  .f3-listado-header p { font-size: .85rem; }
   .f3-table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; min-width: 645px; font-size: .82rem; }
   th, td { padding: .55rem .65rem; vertical-align: middle; }
@@ -78,7 +70,6 @@ app-layout {
 }
 @media (max-width: 760px) {
   app-layout {
-    .panel-portada { background: #e9f2ff; }
     .f3-columns, .f3-form-grid { grid-template-columns: minmax(0, 1fr); }
   }
 }

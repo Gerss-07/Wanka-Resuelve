@@ -13,9 +13,7 @@ export const routes: Routes = [
     path: 'ciudadano',
     loadComponent: () => import('./components/layout/layout').then(m => m.Layout),
     children: [
-      { path: '', pathMatch: 'full', title: 'Panel ciudadano · Wanka Resuelve', loadComponent: cargarReportes, data: { vista: 'inicio' } },
       { path: 'reportes', title: 'Mis reportes · Wanka Resuelve', loadComponent: cargarReportes },
-      { path: 'seguimiento', title: 'Seguimiento · Wanka Resuelve', loadComponent: cargarReportes, data: { vista: 'seguimiento' } },
       { path: 'reportes/nuevo', title: 'Nuevo reporte · Wanka Resuelve', loadComponent: cargarFormulario },
       { path: 'reportes/:id/editar', title: 'Editar reporte · Wanka Resuelve', loadComponent: cargarFormulario },
       { path: 'reportes/:id', title: 'Detalle del reporte · Wanka Resuelve', loadComponent: () => import('./components/reporte-detalle/reporte-detalle').then(m => m.ReporteDetalle) },
