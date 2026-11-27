@@ -1,0 +1,56 @@
+<header class="f3-heading">
+  <div>
+    <p class="f3-eyebrow">Wanka Resuelve · Ciudadano</p>
+    <h1>Mis reportes</h1>
+    <p>Consulta y gestiona las incidencias que registraste.</p>
+  </div>
+  <a class="f3-button" routerLink="/ciudadano/reportes/nuevo"><svg lucidePlus aria-hidden="true" [size]="19"></svg> Nuevo reporte</a>
+</header>
+
+@if (cargando()) {
+  <div class="f3-panel"><p role="status">Cargando reportes…</p></div>
+} @else if (error()) {
+  <section class="f3-panel">
+    <h2>No pudimos cargar tus reportes</h2><p role="alert">{{ error() }}</p>
+    <button type="button" class="f3-secondary" (click)="cargar()">Volver a intentar</button>
+  </section>
+} @else {
+  <section class="f3-panel f3-listado" aria-labelledby="titulo-listado">
+    <div class="f3-listado-header">
+      <div>
+        <h2 id="titulo-listado">Incidencias registradas</h2>
+        <p>{{ reportes().length }} reportes en total</p>
+      </div>
+    </div>
+    @if (!visibles().length) {
+      <p>Aún no tienes reportes. Registra una incidencia para empezar su seguimiento.</p>
+    } @else {
+      <div class="f3-table-wrap">
+        <table aria-labelledby="titulo-listado">
+          <thead><tr><th scope="col">Código</th><th scope="col">Categoría</th><th scope="col">Distrito</th><th scope="col">Estado</th><th scope="col">Fecha</th><th scope="col">Acciones</th></tr></thead>
+          <tbody>
+            @for (r of visibles(); track r.id) {
+              <tr>
+                <td><strong>{{ r.codigo }}</strong></td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Categoría</span>{{ r.categoria.nombre }}</td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Distrito</span>{{ r.distrito.nombre }}</td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Estado</span><app-estado-badge [estado]="r.estado" /></td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Fecha</span>{{ r.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <div class="f3-actions">
+                    <a [routerLink]="['/ciudadano/reportes', r.id]" [attr.aria-label]="'Ver detalle de ' + r.codigo">Ver detalle</a>
+                    @if (r.estado === 'RECIBIDO') {
+                      <a [routerLink]="['/ciudadano/reportes', r.id, 'editar']" [attr.aria-label]="'Editar reporte ' + r.codigo">Editar</a>
+                      <button type="button" class="f3-link-danger" [attr.aria-label]="'Eliminar reporte ' + r.codigo"
+                        [disabled]="eliminando() !== null" (click)="eliminar(r)">Eliminar</button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}

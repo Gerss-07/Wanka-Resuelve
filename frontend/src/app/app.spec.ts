@@ -1,24 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { App } from './app';
+import { routes } from './app.routes';
 
 describe('App', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [App],
-    })
-      .compileComponents();
+  it('crea la aplicación y configura la portada', async () => {
+    await TestBed.configureTestingModule({ imports: [App], providers: [provideRouter(routes)] }).compileComponents();
+    expect(TestBed.createComponent(App).componentInstance).toBeTruthy();
+    expect(routes[0].path).toBe('');
   });
-
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it('should render title', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, frontend');
+  it('reserva las rutas del operador', () => {
+    const operador = routes.find(r => r.path === 'operador');
+    expect(operador?.children?.map(r => r.path)).toEqual(['reportes', 'reportes/:id']);
   });
 });

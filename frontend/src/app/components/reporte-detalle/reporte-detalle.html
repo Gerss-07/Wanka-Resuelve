@@ -1,0 +1,23 @@
+<a class="f3-back" routerLink="/ciudadano/reportes">← Mis reportes</a>
+@if (cargando()) { <p role="status">Cargando reporte…</p> }
+@else if (error()) { <p role="alert">{{ error() }}</p><button class="f3-secondary" (click)="cargar()">Volver a intentar</button> }
+@else if (reporte(); as r) {
+  <div class="f3-heading"><div><p class="f3-eyebrow">DETALLE DEL REPORTE</p><h1>{{ r.codigo }}</h1><app-estado-badge [estado]="r.estado" /></div>@if (r.estado === 'RECIBIDO') { <a class="f3-secondary" [routerLink]="['/ciudadano/reportes', r.id, 'editar']">Editar reporte</a> }</div>
+  <div class="f3-columns"><section class="f3-panel"><h2>Información</h2><dl class="f3-details"><dt>Categoría</dt><dd>{{ r.categoria.nombre }}</dd><dt>Distrito</dt><dd>{{ r.distrito.nombre }}</dd><dt>Descripción</dt><dd>{{ r.descripcion }}</dd><dt>Dirección o referencia</dt><dd>{{ r.referencia }}</dd><dt>Creado</dt><dd>{{ r.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</dd><dt>Actualizado</dt><dd>{{ r.fechaActualizacion | date:'dd/MM/yyyy HH:mm' }}</dd>@if (r.entidad) { <dt>Entidad</dt><dd>{{ r.entidad }}</dd> } @if (r.prioridad) { <dt>Prioridad</dt><dd>{{ r.prioridad }}</dd> } @if (r.motivoRechazo) { <dt>Motivo de rechazo</dt><dd>{{ r.motivoRechazo }}</dd> } @if (r.comentarioSolucion) { <dt>Solución</dt><dd>{{ r.comentarioSolucion }}</dd> }</dl></section>
+  <section class="f3-panel"><h2>Ubicación</h2><app-mapa-selector [punto]="{latitud:r.latitud,longitud:r.longitud}" [soloLectura]="true" /><p>{{ r.latitud }}, {{ r.longitud }}</p><h2>Fotografías</h2><div class="f3-photos">@for (foto of r.fotos; track foto.id) { <img [src]="foto.url" alt="Fotografía del reporte"> }</div></section></div>
+  <section class="f3-panel">
+    <h2>Historial de estados</h2>
+    @if (r.historial.length) {
+      <ol class="f3-history">
+        @for (h of r.historial; track $index) {
+          <li>
+            <app-estado-badge [estado]="h.nuevo" />
+            <time [attr.datetime]="h.fecha">{{ h.fecha | date:'dd/MM/yyyy HH:mm' }}</time>
+            <div>{{ h.usuario }}</div>
+            @if (h.comentario) { <p>{{ h.comentario }}</p> }
+          </li>
+        }
+      </ol>
+    } @else { <p>No hay cambios registrados.</p> }
+  </section>
+}
