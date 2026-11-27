@@ -30,6 +30,7 @@ MENSAJES_CAMPO = {
     "fotos": MENSAJE_FOTOS_CANTIDAD,
     "prioridad": "Prioridad inválida",
     "id_entidad": "La entidad no atiende la categoría del reporte",
+    "motivo": "Indica el motivo del rechazo (mínimo 10 caracteres)",
 }
 
 
@@ -67,6 +68,14 @@ class ReporteAsignar(BaseModel):
 
     prioridad: Prioridad
     id_entidad: int = Field(gt=0)
+
+
+class ReporteRechazar(BaseModel):
+    """RR-07: motivo obligatorio; se guarda en historial_estado.comentario."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    motivo: str = Field(min_length=10, max_length=500)
 
 
 class UsuarioReferencia(BaseModel):

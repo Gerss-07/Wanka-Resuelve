@@ -6,7 +6,8 @@ from backend.repositories.historial import HistorialRepository
 from backend.repositories.reportes import ReporteRepository
 from backend.schemas.auth import Usuario
 from backend.schemas.reportes import (
-    MENSAJES_CAMPO, ReporteAsignar, ReporteDetalle, ReporteFiltros, ReporteResumen,
+    MENSAJES_CAMPO, ReporteAsignar, ReporteDetalle, ReporteFiltros, ReporteRechazar,
+    ReporteResumen,
 )
 from backend.services.exceptions import Conflicto, DatosInvalidos, NoEncontrado
 from backend.services.reportes import MENSAJE_ESTADO, MENSAJE_NO_ENCONTRADO, ReporteService
@@ -14,6 +15,7 @@ from backend.services.reportes import MENSAJE_ESTADO, MENSAJE_NO_ENCONTRADO, Rep
 
 RECIBIDO = "RECIBIDO"
 ASIGNADO = "ASIGNADO"
+RECHAZADO = "RECHAZADO"
 
 
 class OperadorService:
@@ -37,6 +39,12 @@ class OperadorService:
             raise DatosInvalidos(MENSAJES_CAMPO["id_entidad"])
         self._transicion(operador, id_reporte, RECIBIDO, ASIGNADO)
         self.asignaciones.insertar(id_reporte, datos.id_entidad, datos.prioridad)
+        return self._detalle(id_reporte)
+
+    def rechazar(self, operador: Usuario, id_reporte: int, datos: ReporteRechazar) -> ReporteDetalle:
+        """RR-07: RECIBIDO → RECHAZADO (final); el motivo queda en el historial."""
+        self._reporte_en_estado(id_reporte, RECIBIDO)
+        self._transicion(operador, id_reporte, RECIBIDO, RECHAZADO, datos.motivo)
         return self._detalle(id_reporte)
 
     # ----- reglas comunes -----
