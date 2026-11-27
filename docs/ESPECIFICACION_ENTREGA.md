@@ -335,6 +335,8 @@ En FastAPI, `GET /reportes/mis-reportes` se declara **antes** que `GET /reportes
 }
 ```
 
+Cuando el reporte ya fue asignado, `entidad` es `{ "id_entidad": 2, "nombre": "Unidad Simulada de Vías y Veredas", "id_categoria": 2 }`; antes es `null`. Todos los errores, incluidos los `422` de validación, llegan como `{"detail": "mensaje"}` con un solo texto listo para mostrar.
+
 Las rutas no llevan prefijo `/api`, igual que el ejemplo. La respuesta nunca incluye `contrasena_hash`. Las fotos se sirven con `StaticFiles` montado en `/uploads` (por ejemplo `http://localhost:8000/uploads/reportes/3f9a…c1.jpg`), con nombres aleatorios no adivinables; ver la limitación en la sección 14.
 
 ## 8. Validaciones y errores
@@ -547,21 +549,21 @@ Son siete fases que suman unas 8 h 45 min y dejan 15 min de margen dentro de las
 | Fase | Rama | Contenido | Criterio de salida | Tiempo |
 | --- | --- | --- | --- | --- |
 | F0 Base | `develop` | Git con `main` y `develop`, `.gitignore`, `schema.sql`, `seed.sql`, `seed_usuarios.py`, `conexion.py`, `config.py`, `.env.example`, CORS | Las 8 tablas existen en la base principal y en la de pruebas; catálogos y 2 usuarios cargados; `GET /health` responde | 0:45 |
-| F1 Backend ciudadano | `kerry` | Catálogos, `POST/GET/PUT/DELETE` de reportes, fotos, historial, `get_current_user` en modo dev, `require_rol` | `pytest` en verde para CRUD, fotos inválidas y propiedad | 1:30 |
-| F2 Backend operador | `kerry` | Bandeja con filtros, asignar, rechazar, iniciar atención, cerrar | `pytest` en verde para las 4 transiciones, el `409` y la entidad incompatible | 1:00 |
+| F1 Backend ciudadano | `Kerry` | Catálogos, `POST/GET/PUT/DELETE` de reportes, fotos, historial, `get_current_user` en modo dev, `require_rol` | `pytest` en verde para CRUD, fotos inválidas y propiedad | 1:30 |
+| F2 Backend operador | `Kerry` | Bandeja con filtros, asignar, rechazar, iniciar atención, cerrar | `pytest` en verde para las 4 transiciones, el `409` y la entidad incompatible | 1:00 |
 | F3 Frontend ciudadano | `gersson` | Layout con aviso, selector temporal de usuario, interfaces, servicios, mapa, formulario con resumen, Mis reportes, detalle, editar, eliminar | Desde el navegador se crea, ve, edita y elimina un reporte con foto y pin | 2:00 |
 | F4 Frontend operador | `gersson` | Bandeja con filtros y pantalla de revisión con el panel de acciones | Desde el navegador se lleva un reporte de `RECIBIDO` a `CERRADO` y otro a `RECHAZADO` | 1:00 |
-| F5 Autenticación | `kerry` + `gersson` | Registro, login, `/auth/me`, Argon2id, JWT, interceptor, guards, cerrar sesión; eliminar el modo dev | `pytest` de auth en verde; no queda `X-Dev-Usuario-Id` en el código | 1:30 |
+| F5 Autenticación | `Kerry` + `gersson` | Registro, login, `/auth/me`, Argon2id, JWT, interceptor, guards, cerrar sesión; eliminar el modo dev | `pytest` de auth en verde; no queda `X-Dev-Usuario-Id` en el código | 1:30 |
 | F6 Validación y entrega | `develop` → `main` | Guion completo de la sección 13, ajustes, README con el alcance de esta entrega y los comandos | Las 20 pruebas del guion pasan; merge a `main` | 1:00 |
 
 **Uso con Orca y OpenCode**
 
-1. **Ramas:** cada integrante trabaja en su rama personal (`kerry` para Fernando y `gersson` para Gersson). `develop` solo recibe lo que se integra de las dos ramas, y `main` solo lo que ya se validó en `develop`.
+1. **Ramas:** cada integrante trabaja en su rama personal (`Kerry` para Fernando y `gersson` para Gersson). `develop` solo recibe lo que se integra de las dos ramas, y `main` solo lo que ya se validó en `develop`.
 2. **F0 (hecha):** ya está en `develop` como base común. Las dos ramas personales nacen de ahí.
-3. **F1 y F2 (Fernando):** en `kerry`.
+3. **F1 y F2 (Fernando):** en `Kerry`.
 4. **F3 y F4 (Gersson), en paralelo:** en `gersson`, contra el contrato de la sección 7. Conecta cada pantalla al backend real cuando el endpoint ya está en `develop`.
-5. **Integración:** merge de `kerry` y de `gersson` a `develop`, y prueba del flujo completo en modo dev. Después, cada uno actualiza su rama desde `develop`.
-6. **F5 al final (login real):** Fernando hace el backend en `kerry` y Gersson el frontend en `gersson`. Se integran juntas en `develop`, porque el modo dev se elimina en los dos lados a la vez.
+5. **Integración:** merge de `Kerry` y de `gersson` a `develop`, y prueba del flujo completo en modo dev. Después, cada uno actualiza su rama desde `develop`.
+6. **F5 al final (login real):** Fernando hace el backend en `Kerry` y Gersson el frontend en `gersson`. Se integran juntas en `develop`, porque el modo dev se elimina en los dos lados a la vez.
 7. **F6 (los dos):** recorren el guion de la sección 13 en `develop` y, si todo pasa, hacen el merge a `main`.
 
 A cada agente se le entrega este documento completo.
