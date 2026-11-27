@@ -2,6 +2,92 @@
   <div>
     <p class="f3-eyebrow">Wanka Resuelve · Operador</p>
     <h1>Bandeja de reportes</h1>
-    <p>Pantalla pendiente (F4).</p>
+    <p>Revisa, prioriza y asigna los reportes de la ciudadanía.</p>
   </div>
 </header>
+
+<form class="f3-panel f3-form f3-filtros" (submit)="filtrar($event)" novalidate aria-label="Filtros de la bandeja">
+  <div class="f3-form-grid">
+    <div>
+      <label for="estado">Estado</label>
+      <select id="estado" [formField]="formulario.estado">
+        <option value="">Todos los estados</option>
+        @for (e of estados; track e.valor) { <option [value]="e.valor">{{ e.nombre }}</option> }
+      </select>
+    </div>
+    <div>
+      <label for="categoria">Categoría</label>
+      <select id="categoria" [formField]="formulario.id_categoria">
+        <option value="">Todas las categorías</option>
+        @for (c of categorias(); track c.id) { <option [value]="c.id">{{ c.nombre }}</option> }
+      </select>
+    </div>
+    <div>
+      <label for="distrito">Distrito</label>
+      <select id="distrito" [formField]="formulario.id_distrito">
+        <option value="">Todos los distritos</option>
+        @for (d of distritos(); track d.id) { <option [value]="d.id">{{ d.nombre }}</option> }
+      </select>
+    </div>
+    <div class="f3-form-grid">
+      <div>
+        <label for="fecha-desde">Desde</label>
+        <input id="fecha-desde" type="date" [formField]="formulario.fecha_desde">
+      </div>
+      <div>
+        <label for="fecha-hasta">Hasta</label>
+        <input id="fecha-hasta" type="date" [formField]="formulario.fecha_hasta" aria-describedby="fecha-hasta-errores">
+        <div id="fecha-hasta-errores">
+          @if (formulario.fecha_hasta().invalid() && formulario.fecha_hasta().touched()) {
+            @for (e of formulario.fecha_hasta().errors(); track $index) { <p class="f3-error">{{ e.message }}</p> }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="f3-actions">
+    <button class="f3-button" type="submit" [disabled]="formulario().invalid() || cargando()">Filtrar</button>
+    <button class="f3-secondary" type="button" (click)="limpiar()" [disabled]="cargando()">Limpiar</button>
+  </div>
+</form>
+
+@if (cargando()) {
+  <div class="f3-panel"><p role="status">Cargando reportes…</p></div>
+} @else if (error()) {
+  <section class="f3-panel">
+    <h2>No pudimos cargar la bandeja</h2><p role="alert">{{ error() }}</p>
+    <button type="button" class="f3-secondary" (click)="filtrar()">Volver a intentar</button>
+  </section>
+} @else {
+  <section class="f3-panel f3-listado" aria-labelledby="titulo-bandeja">
+    <div class="f3-listado-header">
+      <div>
+        <h2 id="titulo-bandeja">Reportes</h2>
+        <p>{{ reportes().length }} reportes encontrados</p>
+      </div>
+    </div>
+    @if (!reportes().length) {
+      <p>No hay reportes que coincidan con los filtros.</p>
+    } @else {
+      <div class="f3-table-wrap">
+        <table aria-labelledby="titulo-bandeja">
+          <thead><tr><th scope="col">Código</th><th scope="col">Ciudadano</th><th scope="col">Categoría</th><th scope="col">Distrito</th><th scope="col">Estado</th><th scope="col">Prioridad</th><th scope="col">Fecha</th><th scope="col">Acciones</th></tr></thead>
+          <tbody>
+            @for (r of reportes(); track r.id) {
+              <tr>
+                <td><strong>{{ r.codigo }}</strong></td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Ciudadano</span>{{ r.ciudadano }}</td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Categoría</span>{{ r.categoria.nombre }}</td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Distrito</span>{{ r.distrito.nombre }}</td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Estado</span><app-estado-badge [estado]="r.estado" /></td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Prioridad</span>{{ r.prioridad ?? '—' }}</td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Fecha</span>{{ r.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td><div class="f3-actions"><a [routerLink]="['/operador/reportes', r.id]" [attr.aria-label]="'Revisar ' + r.codigo">Revisar</a></div></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}

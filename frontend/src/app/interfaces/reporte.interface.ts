@@ -25,3 +25,13 @@ export interface ReporteDetalle extends ReporteResumen {
 }
 export interface ReporteDatos { idCategoria: number; idDistrito: number; descripcion: string; referencia: string; latitud: number; longitud: number }
 export interface ReporteDatosApi { id_categoria: number; id_distrito: number; descripcion: string; referencia: string; latitud: number; longitud: number }
+
+export type Prioridad = 'BAJA' | 'MEDIA' | 'ALTA';
+/** Filtros de la bandeja; '' significa «sin filtro». Fechas AAAA-MM-DD. */
+export interface FiltrosBandeja { estado: Estado | ''; idCategoria: string; idDistrito: string; fechaDesde: string; fechaHasta: string }
+export interface FiltrosBandejaApi { estado?: Estado; id_categoria?: string; id_distrito?: string; fecha_desde?: string; fecha_hasta?: string }
+export interface ReporteAsignar { prioridad: Prioridad; idEntidad: number }
+export interface ReporteAsignarApi { prioridad: Prioridad; id_entidad: number }
+export interface ReporteRechazarApi { motivo: string }
+export interface ReporteIniciarAtencionApi { comentario: string | null }
+export interface ReporteCerrarApi { comentario_solucion: string }

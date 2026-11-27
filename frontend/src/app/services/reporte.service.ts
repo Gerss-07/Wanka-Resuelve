@@ -7,10 +7,10 @@ import { ReporteDatos, ReporteDatosApi, ReporteDetalle, ReporteDetalleApi, Repor
 export class ReporteService {
   private http = inject(HttpClient);
   private url = `${environment.apiUrl}/reportes`;
-  private resumenDesdeApi(r: ReporteResumenApi): ReporteResumen {
+  resumenDesdeApi(r: ReporteResumenApi): ReporteResumen {
     return { id: r.id_reporte, codigo: r.codigo, ciudadano: r.ciudadano.nombre, categoria: { id: r.categoria.id_categoria, nombre: r.categoria.nombre }, distrito: { id: r.distrito.id_distrito, nombre: r.distrito.nombre }, estado: r.estado, prioridad: r.prioridad, fechaCreacion: r.fecha_creacion };
   }
-  private desdeApi(r: ReporteDetalleApi): ReporteDetalle {
+  desdeApi(r: ReporteDetalleApi): ReporteDetalle {
     return { ...this.resumenDesdeApi(r), descripcion: r.descripcion, referencia: r.referencia, latitud: Number(r.latitud), longitud: Number(r.longitud), entidad: r.entidad?.nombre ?? null, motivoRechazo: r.motivo_rechazo, comentarioSolucion: r.comentario_solucion, fotos: r.fotos.map(f => ({ id: f.id_foto, url: new URL(f.url, environment.apiUrl).href })), historial: r.historial.map(h => ({ anterior: h.estado_anterior, nuevo: h.estado_nuevo, usuario: h.usuario.nombre, comentario: h.comentario, fecha: h.fecha })).sort((a,b) => a.fecha.localeCompare(b.fecha)), fechaActualizacion: r.fecha_actualizacion };
   }
   private haciaApi(d: ReporteDatos): ReporteDatosApi {
