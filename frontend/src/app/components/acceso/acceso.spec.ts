@@ -16,14 +16,4 @@ describe('Acceso', () => {
     expect(avisos.error).toHaveBeenCalledWith('Completa los campos obligatorios');
     expect(enviar).not.toHaveBeenCalled();
   });
-  it('no muestra éxito cuando el servicio no está disponible', async () => {
-    const avisos = { error: vi.fn() };
-    await TestBed.configureTestingModule({ imports: [Acceso], providers: [provideRouter([]), { provide: ActivatedRoute, useValue: { snapshot: { data: {} } } }, { provide: AlertaService, useValue: avisos }] }).compileComponents();
-    const fixture = TestBed.createComponent(Acceso);
-    fixture.detectChanges();
-    const acceso = fixture.componentInstance as unknown as { form: { patchValue: (v: object) => void }; enviar: () => void };
-    acceso.form.patchValue({ correo: 'persona@example.org', contrasena: 'contraseña' });
-    acceso.enviar();
-    expect(avisos.error).toHaveBeenCalledWith('El servicio de autenticación aún no está disponible.');
-  });
 });

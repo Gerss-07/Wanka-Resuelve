@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { AlertaService } from '../../services/alerta.service';
 
@@ -30,7 +29,7 @@ export class Acceso {
     if (this.registro && nombre.trim().length < 2) return;
     if (this.registro && contrasena !== confirmar) { void this.avisos.error('Las contraseñas no coinciden'); return; }
     this.enviando = true;
-    const solicitud = this.registro ? this.auth.registrar(nombre.trim(), correo.trim(), contrasena) : this.auth.iniciarSesion(correo.trim(), contrasena);
-    solicitud.pipe(finalize(() => this.enviando = false)).subscribe({ error: () => void this.avisos.error('El servicio de autenticación aún no está disponible.') });
+    const solicitud = this.registro ? this.auth.registrar({ nombre, correo, contrasena }) : this.auth.iniciarSesion(correo, contrasena);
+    solicitud.catch(e => this.avisos.errorHttp(e)).finally(() => this.enviando = false);
   }
 }
