@@ -6,8 +6,8 @@ from backend.repositories.historial import HistorialRepository
 from backend.repositories.reportes import ReporteRepository
 from backend.schemas.auth import Usuario
 from backend.schemas.reportes import (
-    MENSAJES_CAMPO, ReporteAsignar, ReporteDetalle, ReporteFiltros, ReporteIniciarAtencion,
-    ReporteRechazar, ReporteResumen,
+    MENSAJES_CAMPO, ReporteAsignar, ReporteCerrar, ReporteDetalle, ReporteFiltros,
+    ReporteIniciarAtencion, ReporteRechazar, ReporteResumen,
 )
 from backend.services.exceptions import Conflicto, DatosInvalidos, NoEncontrado
 from backend.services.reportes import MENSAJE_ESTADO, MENSAJE_NO_ENCONTRADO, ReporteService
@@ -17,6 +17,7 @@ RECIBIDO = "RECIBIDO"
 ASIGNADO = "ASIGNADO"
 RECHAZADO = "RECHAZADO"
 EN_ATENCION = "EN_ATENCION"
+CERRADO = "CERRADO"
 
 
 class OperadorService:
@@ -53,6 +54,12 @@ class OperadorService:
         """RR-08: ASIGNADO → EN_ATENCION, con comentario opcional."""
         self._reporte_en_estado(id_reporte, ASIGNADO)
         self._transicion(operador, id_reporte, ASIGNADO, EN_ATENCION, datos.comentario or None)
+        return self._detalle(id_reporte)
+
+    def cerrar(self, operador: Usuario, id_reporte: int, datos: ReporteCerrar) -> ReporteDetalle:
+        """RR-09: EN_ATENCION → CERRADO (final); la solución queda en el historial."""
+        self._reporte_en_estado(id_reporte, EN_ATENCION)
+        self._transicion(operador, id_reporte, EN_ATENCION, CERRADO, datos.comentario_solucion)
         return self._detalle(id_reporte)
 
     # ----- reglas comunes -----

@@ -6,8 +6,8 @@ from fastapi import APIRouter, Body, Query
 
 from backend.core.dependencies import OperadorDep, OperadorServiceDep
 from backend.schemas.reportes import (
-    ReporteAsignar, ReporteDetalle, ReporteFiltros, ReporteIniciarAtencion, ReporteRechazar,
-    ReporteResumen,
+    ReporteAsignar, ReporteCerrar, ReporteDetalle, ReporteFiltros, ReporteIniciarAtencion,
+    ReporteRechazar, ReporteResumen,
 )
 
 
@@ -41,3 +41,9 @@ def iniciar_atencion(
     datos: Annotated[ReporteIniciarAtencion | None, Body()] = None,
 ):
     return service.iniciar_atencion(usuario, id_reporte, datos or ReporteIniciarAtencion())
+
+
+@router.post("/{id_reporte}/cerrar", response_model=ReporteDetalle)
+def cerrar(id_reporte: int, datos: ReporteCerrar, usuario: OperadorDep,
+           service: OperadorServiceDep):
+    return service.cerrar(usuario, id_reporte, datos)

@@ -31,6 +31,7 @@ MENSAJES_CAMPO = {
     "prioridad": "Prioridad inválida",
     "id_entidad": "La entidad no atiende la categoría del reporte",
     "motivo": "Indica el motivo del rechazo (mínimo 10 caracteres)",
+    "comentario_solucion": "Describe la solución (mínimo 10 caracteres)",
 }
 
 
@@ -84,6 +85,14 @@ class ReporteIniciarAtencion(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     comentario: str | None = Field(default=None, max_length=1000)
+
+
+class ReporteCerrar(BaseModel):
+    """RR-09: comentario de solución obligatorio; se guarda en historial_estado.comentario."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    comentario_solucion: str = Field(min_length=10, max_length=1000)
 
 
 class UsuarioReferencia(BaseModel):
