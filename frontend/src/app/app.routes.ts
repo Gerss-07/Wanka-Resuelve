@@ -21,5 +21,13 @@ export const routes: Routes = [
       { path: 'reportes/:id', title: 'Detalle del reporte · Wanka Resuelve', loadComponent: () => import('./components/reporte-detalle/reporte-detalle').then(m => m.ReporteDetalle) },
     ],
   },
+  {
+    path: 'operador',
+    loadComponent: () => import('./components/layout/layout').then(m => m.Layout),
+    children: [
+      { path: 'reportes', title: 'Bandeja · Wanka Resuelve', loadComponent: () => import('./components/bandeja-operador/bandeja-operador').then(m => m.BandejaOperador) },
+      { path: 'reportes/:id', title: 'Revisión del reporte · Wanka Resuelve', loadComponent: () => import('./components/revision-operador/revision-operador').then(m => m.RevisionOperador) },
+    ],
+  },
   { path: '**', redirectTo: '' },
 ];

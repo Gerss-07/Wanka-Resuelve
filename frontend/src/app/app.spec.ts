@@ -9,4 +9,8 @@ describe('App', () => {
     expect(TestBed.createComponent(App).componentInstance).toBeTruthy();
     expect(routes[0].path).toBe('');
   });
+  it('reserva las rutas del operador', () => {
+    const operador = routes.find(r => r.path === 'operador');
+    expect(operador?.children?.map(r => r.path)).toEqual(['reportes', 'reportes/:id']);
+  });
 });
