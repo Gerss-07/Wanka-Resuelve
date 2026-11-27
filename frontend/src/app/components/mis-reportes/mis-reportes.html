@@ -1,0 +1,72 @@
+<header class="f3-heading" [class.panel-portada]="inicio">
+  <div>
+    <p class="f3-eyebrow">Wanka Resuelve · Ciudadano</p>
+    <h1>{{ inicio ? 'Panel ciudadano' : seguimiento ? 'Seguimiento' : 'Mis reportes' }}</h1>
+    <p>{{ inicio ? 'Revisa la actividad y el estado de las incidencias que registraste.' :
+      seguimiento ? 'Filtra por estado y abre el detalle para consultar el historial.' :
+      'Consulta y gestiona las incidencias que registraste.' }}</p>
+    @if (inicio) {
+      <span class="panel-cobertura"><svg lucideMapPin aria-hidden="true" [size]="15"></svg> Huancayo · El Tambo · Chilca</span>
+    }
+  </div>
+  <a class="f3-button" routerLink="/ciudadano/reportes/nuevo"><svg lucidePlus aria-hidden="true" [size]="19"></svg> Nuevo reporte</a>
+</header>
+
+@if (cargando()) {
+  <div class="f3-panel"><p role="status">Cargando reportes…</p></div>
+} @else if (error()) {
+  <section class="f3-panel">
+    <h2>No pudimos cargar tus reportes</h2><p role="alert">{{ error() }}</p>
+    <button type="button" class="f3-secondary" (click)="cargar()">Volver a intentar</button>
+  </section>
+} @else {
+  @if (inicio) { <app-resumen-reportes [reportes]="reportes()" /> }
+  <section class="f3-panel f3-listado" aria-labelledby="titulo-listado">
+    <div class="f3-listado-header">
+      <div>
+        <h2 id="titulo-listado">{{ inicio ? 'Mis reportes recientes' : 'Incidencias registradas' }}</h2>
+        <p>{{ inicio ? 'Los últimos reportes que enviaste.' : reportes().length + ' reportes en total' }}</p>
+      </div>
+      @if (inicio) {
+        <a class="panel-link" routerLink="/ciudadano/reportes">Ver todos mis reportes <svg lucideArrowRight aria-hidden="true" [size]="17"></svg></a>
+      } @else if (seguimiento) {
+        <label class="f3-filtro">Estado
+          <select #estado [value]="filtro()" (change)="filtro.set(estado.value)">
+            <option value="">Todos los estados</option>
+            @for (item of estados; track item.estado) { <option [value]="item.estado">{{ item.nombre }}</option> }
+          </select>
+        </label>
+      }
+    </div>
+    @if (!visibles().length) {
+      <p>{{ filtro() ? 'No tienes reportes en este estado.' : 'Aún no tienes reportes. Registra una incidencia para empezar su seguimiento.' }}</p>
+    } @else {
+      <div class="f3-table-wrap">
+        <table aria-labelledby="titulo-listado">
+          <thead><tr><th scope="col">Código</th><th scope="col">Categoría</th><th scope="col">Distrito</th><th scope="col">Estado</th><th scope="col">Fecha</th><th scope="col">Acciones</th></tr></thead>
+          <tbody>
+            @for (r of visibles(); track r.id) {
+              <tr>
+                <td><strong>{{ r.codigo }}</strong></td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Categoría</span>{{ r.categoria.nombre }}</td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Distrito</span>{{ r.distrito.nombre }}</td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Estado</span><app-estado-badge [estado]="r.estado" /></td>
+                <td><span class="f3-mobile-label" aria-hidden="true">Fecha</span>{{ r.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <div class="f3-actions">
+                    <a [routerLink]="['/ciudadano/reportes', r.id]" [attr.aria-label]="'Ver detalle de ' + r.codigo">Ver detalle</a>
+                    @if (r.estado === 'RECIBIDO') {
+                      <a [routerLink]="['/ciudadano/reportes', r.id, 'editar']" [attr.aria-label]="'Editar reporte ' + r.codigo">Editar</a>
+                      <button type="button" class="f3-link-danger" [attr.aria-label]="'Eliminar reporte ' + r.codigo"
+                        [disabled]="eliminando() !== null" (click)="eliminar(r)">Eliminar</button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}

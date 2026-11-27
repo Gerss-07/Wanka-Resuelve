@@ -1,0 +1,20 @@
+<header class="header" id="inicio">
+  <div class="container header-inner">
+    <a href="/" class="brand" aria-label="Ir al inicio de Wanka Resuelve" (click)="irInicio($event)">
+      <img src="/images/logo-wanka-resuelve.png" alt="Wanka Resuelve, cada reporte cuenta">
+    </a>
+    <button class="menu-toggle" type="button" (click)="menuAbierto = !menuAbierto" [attr.aria-expanded]="menuAbierto" aria-controls="navegacion">Menú <span aria-hidden="true">☰</span></button>
+    <nav id="navegacion" [class.open]="menuAbierto" aria-label="Navegación principal">
+      <a href="/#categorias" [class.current]="seccionActiva === 'categorias'" [attr.aria-current]="seccionActiva === 'categorias' ? 'location' : null" (click)="navegar($event, 'categorias')">Categorías</a>
+      <a href="/#noticias" [class.current]="seccionActiva === 'noticias'" [attr.aria-current]="seccionActiva === 'noticias' ? 'location' : null" (click)="navegar($event, 'noticias')">Noticias</a>
+      <a href="/#galeria" [class.current]="seccionActiva === 'galeria'" [attr.aria-current]="seccionActiva === 'galeria' ? 'location' : null" (click)="navegar($event, 'galeria')">Nuestro valle</a>
+      <a href="/#como-funciona" [class.current]="seccionActiva === 'como-funciona'" [attr.aria-current]="seccionActiva === 'como-funciona' ? 'location' : null" (click)="navegar($event, 'como-funciona')">Cómo funciona</a>
+      <a href="/#distritos" [class.current]="seccionActiva === 'distritos'" [attr.aria-current]="seccionActiva === 'distritos' ? 'location' : null" (click)="navegar($event, 'distritos')">Distritos</a>
+      <div class="nav-actions">
+        <a class="login-button" routerLink="/login" (click)="menuAbierto = false">Iniciar sesión</a>
+        <a class="register-button" routerLink="/registro" (click)="menuAbierto = false">Registrarme</a>
+        <a class="report-button" routerLink="/login" [queryParams]="{ destino: '/ciudadano/reportes/nuevo' }" (click)="menuAbierto = false">Reportar incidencia</a>
+      </div>
+    </nav>
+  </div>
+</header>

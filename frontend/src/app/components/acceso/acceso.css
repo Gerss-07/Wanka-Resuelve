@@ -1,0 +1,32 @@
+:host { display: block; }
+.acceso { min-height: 100svh; display: grid; grid-template-columns: 1.05fr 1fr; color: #142c3d; }
+.bienvenida { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: clamp(32px, 5vw, 72px); color: #fff; background: linear-gradient(145deg, #0759b5, #06406f 75%, #006e68); }
+.bienvenida::after { content: ''; position: absolute; width: 520px; height: 520px; right: -250px; bottom: -260px; border: 1px solid #ffffff40; border-radius: 50%; box-shadow: 0 0 0 65px #ffffff09, 0 0 0 130px #ffffff08; pointer-events: none; }
+.marca { display: inline-block; width: 180px; padding: 7px; border-radius: 8px; background: white; }
+.marca img { display: block; width: 100%; }
+.bienvenida-texto { position: relative; z-index: 1; max-width: 530px; padding: 60px 0; }
+.bienvenida-texto span, .lugares, .etiqueta { font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+.bienvenida h1 { margin: 20px 0; font-size: clamp(36px, 4.6vw, 64px); line-height: 1.08; letter-spacing: -.045em; }
+.bienvenida p { max-width: 440px; color: #e4f2fa; line-height: 1.7; }
+.bienvenida .lema { color: white; font-size: 21px; font-weight: 700; }
+.lugares { margin: 0; }
+.formulario { display: grid; place-items: center; padding: 48px 24px; background: #fff; }
+.contenido { width: min(100%, 430px); }
+.volver { display: inline-block; margin-bottom: 48px; color: #52676c; text-decoration: none; font-size: 14px; }
+.etiqueta { color: #08746d; }
+h2 { margin: 8px 0; font-size: 36px; line-height: 1.2; letter-spacing: -.04em; }
+.intro, .nota { color: #52676c; line-height: 1.6; }
+form { display: grid; gap: 8px; margin-top: 30px; }
+label { margin-top: 12px; font-size: 14px; font-weight: 700; }
+input { width: 100%; min-height: 48px; padding: 11px 14px; border: 1px solid #c5d3d7; border-radius: 7px; color: #142c3d; font: inherit; }
+input:focus-visible { outline: 2px solid #0759b5; outline-offset: 2px; }
+.clave { display: flex; align-items: center; position: relative; }
+.clave input { padding-right: 85px; }
+.clave button { position: absolute; right: 8px; min-height: 40px; border: 0; color: #0759b5; background: transparent; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+small { color: #a52e2e; }
+.principal { min-height: 50px; margin-top: 20px; border: 0; border-radius: 7px; color: #fff; background: #0759b5; font: inherit; font-weight: 800; cursor: pointer; }
+.principal:disabled { opacity: .6; cursor: wait; }
+.cambio { margin-top: 28px; color: #52676c; text-align: center; }
+.cambio a { color: #0759b5; font-weight: 700; }
+.nota { padding-top: 20px; border-top: 1px solid #e1e9e9; font-size: 13px; }
+@media (max-width: 767px) { .acceso { grid-template-columns: 1fr; } .bienvenida { padding: 24px; } .marca { width: 140px; } .bienvenida-texto { padding: 36px 0 24px; } .bienvenida h1 { font-size: 36px; } .lugares { font-size: 10px; } .formulario { padding: 36px 24px 56px; } .volver { margin-bottom: 28px; } }
