@@ -23,9 +23,9 @@ input:focus-visible { outline: 2px solid #0759b5; outline-offset: 2px; }
 .clave { display: flex; align-items: center; position: relative; }
 .clave input { padding-right: 85px; }
 .clave button { position: absolute; right: 8px; min-height: 40px; border: 0; color: #0759b5; background: transparent; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-small { color: #a52e2e; }
+small { display: block; color: #a52e2e; }
 .principal { min-height: 50px; margin-top: 20px; border: 0; border-radius: 7px; color: #fff; background: #0759b5; font: inherit; font-weight: 800; cursor: pointer; }
-.principal:disabled { opacity: .6; cursor: wait; }
+.principal:disabled { opacity: .6; cursor: not-allowed; }
 .cambio { margin-top: 28px; color: #52676c; text-align: center; }
 .cambio a { color: #0759b5; font-weight: 700; }
 .nota { padding-top: 20px; border-top: 1px solid #e1e9e9; font-size: 13px; }

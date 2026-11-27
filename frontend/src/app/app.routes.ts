@@ -3,12 +3,11 @@ import { Inicio } from './pages/inicio/inicio';
 
 const cargarReportes = () => import('./components/mis-reportes/mis-reportes').then(m => m.MisReportes);
 const cargarFormulario = () => import('./components/reporte-form/reporte-form').then(m => m.ReporteForm);
-const cargarAcceso = () => import('./components/acceso/acceso').then(m => m.Acceso);
 
 export const routes: Routes = [
   { path: '', component: Inicio, pathMatch: 'full' },
-  { path: 'login', title: 'Iniciar sesión · Wanka Resuelve', loadComponent: cargarAcceso },
-  { path: 'registro', title: 'Crear cuenta · Wanka Resuelve', loadComponent: cargarAcceso, data: { registro: true } },
+  { path: 'login', title: 'Iniciar sesión · Wanka Resuelve', loadComponent: () => import('./components/login/login').then(m => m.Login) },
+  { path: 'registro', title: 'Crear cuenta · Wanka Resuelve', loadComponent: () => import('./components/registro/registro').then(m => m.Registro) },
   {
     path: 'ciudadano',
     loadComponent: () => import('./components/layout/layout').then(m => m.Layout),
