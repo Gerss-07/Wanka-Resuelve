@@ -1,7 +1,5 @@
 """Reglas del ciudadano sobre sus reportes (RR-01 a RR-05, RR-10 a RR-12)."""
 
-from datetime import datetime
-
 from backend.repositories.catalogos import CatalogoRepository
 from backend.repositories.fotos import FotoRepository
 from backend.repositories.historial import HistorialRepository
@@ -46,8 +44,10 @@ class ReporteService:
         guardadas: list[FotoGuardada] = []
         try:
             id_reporte = self.repository.insertar(usuario.id_usuario, datos)  # RR-01
+            # El año sale de fecha_creacion (hora del servidor MySQL en la zona de la sesión).
+            fecha_creacion = self.repository.obtener(id_reporte)["fecha_creacion"]
             self.repository.actualizar_codigo(
-                id_reporte, generar_codigo(id_reporte, datetime.now().year)
+                id_reporte, generar_codigo(id_reporte, fecha_creacion.year)
             )
             guardadas = self.archivos.guardar(fotos_validas)
             for orden, foto in enumerate(guardadas, start=1):

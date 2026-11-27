@@ -1,6 +1,6 @@
 """F1: catálogos, usuario temporal y CRUD de reportes del ciudadano contra la base de pruebas."""
 
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -128,6 +128,15 @@ def test_crear_reporte_valido_v08(client, base_pruebas, sql, uploads_dir):
     assert filas == [{"orden": 1, "tipo_mime": "image/jpeg", "tamano_bytes": len(JPEG)},
                      {"orden": 2, "tipo_mime": "image/png", "tamano_bytes": len(PNG)}]
     assert contar(sql, "historial_estado") == 1
+
+
+def test_fecha_y_codigo_en_hora_de_peru(client, base_pruebas, sql):
+    reporte = crear(client, sql, base_pruebas["ciudadano_a"]).json()
+    ahora_peru = datetime.now(timezone(timedelta(hours=-5))).replace(tzinfo=None)
+    creado = datetime.fromisoformat(reporte["fecha_creacion"])
+    assert abs(creado - ahora_peru) < timedelta(minutes=2)
+    assert reporte["codigo"] == f"WR-{creado.year}-{reporte['id_reporte']:06d}"
+    assert datetime.fromisoformat(reporte["historial"][0]["fecha"]) == creado
 
 
 def test_textos_se_recortan_y_autor_es_la_sesion(client, base_pruebas, sql):
