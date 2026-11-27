@@ -1,4 +1,4 @@
-<app-header (acceso)="abrirAcceso($event)" />
+<app-header />
 
 <main>
   <section class="hero" data-enter aria-label="Lugares de Huancayo y el Valle del Mantaro" aria-roledescription="carrusel" (touchstart)="iniciarToque($event)" (touchend)="terminarToque($event)" (keydown.arrowleft)="cambiar(-1)" (keydown.arrowright)="cambiar(1)">
@@ -11,7 +11,7 @@
       <span class="hero-kicker">{{ diapositivas[actual].lugar }}</span>
       <h1>{{ diapositivas[actual].titulo }}</h1>
       <p>{{ diapositivas[actual].descripcion }}</p>
-      <div class="hero-actions"><button type="button" class="hero-link" (click)="abrirAcceso('Reportar incidencia')">Reportar incidencia <svg lucideArrowRight [size]="18"></svg></button><a class="hero-button" href="#como-funciona">Cómo funciona <span aria-hidden="true">↗</span></a></div>
+      <div class="hero-actions"><a class="hero-link" routerLink="/login" [queryParams]="{ destino: '/ciudadano/reportes/nuevo' }">Reportar incidencia <svg lucideArrowRight [size]="18"></svg></a><a class="hero-button" href="#como-funciona">Cómo funciona <span aria-hidden="true">↗</span></a></div>
     </div>
     <div class="container carousel-controls">
       <div class="carousel-dots">@for (slide of diapositivas; track slide.imagen; let i = $index) { <button type="button" [class.selected]="i === actual" [attr.aria-label]="'Ir a imagen ' + (i + 1)" [attr.aria-current]="i === actual ? 'true' : null" (click)="actual = i"></button> }</div>
@@ -42,7 +42,7 @@
   <section class="feature">
     <div class="container feature-layout">
       <div><span class="feature-kicker">UNA IDEA CON PROPÓSITO</span><h2>Una mirada más cercana a nuestro entorno.</h2></div>
-      <div><p>Desde pistas y residuos hasta parques y drenaje, la propuesta busca reunir información para facilitar el seguimiento de cada reporte.</p><a href="#como-funciona">Descubre el recorrido <span aria-hidden="true">↗</span></a><small>Registro y seguimiento previstos; aún en desarrollo.</small><button type="button" class="feature-report" (click)="abrirAcceso('Reportar incidencia')">Reportar incidencia <span aria-hidden="true">↗</span></button></div>
+      <div><p>Desde pistas y residuos hasta parques y drenaje, la propuesta busca reunir información para facilitar el seguimiento de cada reporte.</p><a href="#como-funciona">Descubre el recorrido <span aria-hidden="true">↗</span></a><small>Registro y seguimiento previstos; aún en desarrollo.</small><a class="feature-report" routerLink="/login" [queryParams]="{ destino: '/ciudadano/reportes/nuevo' }">Reportar incidencia <span aria-hidden="true">↗</span></a></div>
     </div>
   </section>
 

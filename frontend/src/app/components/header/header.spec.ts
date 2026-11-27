@@ -4,21 +4,21 @@ import { Header } from './header';
 
 describe('Header', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter([])] }));
-  it('abre el menú y lo cierra al solicitar acceso', async () => {
+  it('abre el menú y lo cierra al elegir Iniciar sesión', async () => {
     await TestBed.configureTestingModule({ imports: [Header] }).compileComponents();
     const fixture = TestBed.createComponent(Header);
-    const acceso = vi.fn();
-    fixture.componentInstance.acceso.subscribe(acceso);
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
     const toggle = element.querySelector<HTMLButtonElement>('.menu-toggle')!;
     toggle.click();
     fixture.detectChanges();
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    const login = Array.from(element.querySelectorAll('button')).find((button) => button.textContent?.includes('Iniciar sesión'))!;
+    const login = element.querySelector<HTMLAnchorElement>('.login-button')!;
     login.click();
     fixture.detectChanges();
-    expect(acceso).toHaveBeenCalledWith('Iniciar sesión');
+    expect(login.getAttribute('href')).toBe('/login');
+    expect(navegar).toHaveBeenCalledOnce();
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
   });
 

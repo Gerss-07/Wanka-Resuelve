@@ -2,6 +2,7 @@
 @import '@angular/material/prebuilt-themes/azure-blue.css';
 @import 'bootstrap/dist/css/bootstrap-grid.min.css';
 @import 'bootstrap/dist/css/bootstrap-utilities.min.css';
+@import 'leaflet/dist/leaflet.css';
 
 :root {
   color-scheme: light;

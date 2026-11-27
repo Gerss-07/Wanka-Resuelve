@@ -1,14 +1,14 @@
 import { DOCUMENT } from '@angular/common';
-import { afterNextRender, Component, HostListener, inject, output } from '@angular/core';
-import { Router } from '@angular/router';
+import { afterNextRender, Component, HostListener, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-header',
+  imports: [RouterLink],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
 export class Header {
-  readonly acceso = output<string>();
   protected menuAbierto = false;
   protected seccionActiva = '';
   private readonly documento = inject(DOCUMENT);
@@ -78,10 +78,5 @@ export class Header {
       const elemento = this.documento.getElementById(id);
       return elemento && elemento.getBoundingClientRect().top <= limite;
     }).at(-1) ?? '';
-  }
-
-  protected abrirAcceso(titulo: string): void {
-    this.menuAbierto = false;
-    this.acceso.emit(titulo);
   }
 }

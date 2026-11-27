@@ -11,9 +11,9 @@
       <a href="/#como-funciona" [class.current]="seccionActiva === 'como-funciona'" [attr.aria-current]="seccionActiva === 'como-funciona' ? 'location' : null" (click)="navegar($event, 'como-funciona')">Cómo funciona</a>
       <a href="/#distritos" [class.current]="seccionActiva === 'distritos'" [attr.aria-current]="seccionActiva === 'distritos' ? 'location' : null" (click)="navegar($event, 'distritos')">Distritos</a>
       <div class="nav-actions">
-        <button type="button" class="login-button" (click)="abrirAcceso('Iniciar sesión')">Iniciar sesión</button>
-        <button type="button" class="register-button" (click)="abrirAcceso('Registrarme')">Registrarme</button>
-        <button type="button" class="report-button" (click)="abrirAcceso('Reportar incidencia')">Reportar incidencia</button>
+        <a class="login-button" routerLink="/login" (click)="menuAbierto = false">Iniciar sesión</a>
+        <a class="register-button" routerLink="/registro" (click)="menuAbierto = false">Registrarme</a>
+        <a class="report-button" routerLink="/login" [queryParams]="{ destino: '/ciudadano/reportes/nuevo' }" (click)="menuAbierto = false">Reportar incidencia</a>
       </div>
     </nav>
   </div>

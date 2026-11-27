@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
+import { routes } from '../../app.routes';
 import { Inicio } from './inicio';
 
 describe('Inicio', () => {
@@ -18,14 +19,19 @@ describe('Inicio', () => {
     expect(element.querySelector('img')?.getAttribute('src')).toBe('/images/logo-wanka-resuelve.png');
   });
 
-  it('informa que el acceso aún no está disponible', async () => {
-    const open = vi.fn();
-    await TestBed.configureTestingModule({ imports: [Inicio], providers: [{ provide: MatDialog, useValue: { open } }] }).compileComponents();
-    const fixture = TestBed.createComponent(Inicio);
-    fixture.detectChanges();
-    const button = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button')).find((item) => item.textContent?.includes('Iniciar sesión'));
-    button?.click();
-    expect(open).toHaveBeenCalledOnce();
+  it('abre la pantalla de login desde el encabezado y enlaza con el registro', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter(routes)] });
+    const harness = await RouterTestingHarness.create('/');
+    harness.routeNativeElement!.querySelector<HTMLAnchorElement>('.login-button')!.click();
+    await harness.fixture.whenStable();
+    expect(TestBed.inject(Router).url).toBe('/login');
+    expect(harness.routeNativeElement!.querySelector('.bienvenida img')?.getAttribute('src')).toBe('/images/logo-wanka-resuelve.png');
+    expect(harness.routeNativeElement!.querySelector('.formulario h2')?.textContent).toBe('Iniciar sesión');
+
+    harness.routeNativeElement!.querySelector<HTMLAnchorElement>('a[href="/registro"]')!.click();
+    await harness.fixture.whenStable();
+    expect(TestBed.inject(Router).url).toBe('/registro');
+    expect(harness.routeNativeElement!.querySelector('.formulario h2')?.textContent).toBe('Crear cuenta');
   });
 
   it('cambia las imágenes y conserva las noticias con fuentes', async () => {
@@ -60,15 +66,21 @@ describe('Inicio', () => {
     expect(element.querySelector('header a[href="#"]')).toBeNull();
   });
 
-  it('mantiene los avisos de las tres acciones del encabezado', async () => {
-    const open = vi.fn();
-    await TestBed.configureTestingModule({ imports: [Inicio], providers: [{ provide: MatDialog, useValue: { open } }] }).compileComponents();
-    const fixture = TestBed.createComponent(Inicio);
-    fixture.detectChanges();
-    const buttons = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('header button'));
-    for (const titulo of ['Iniciar sesión', 'Registrarme', 'Reportar incidencia']) {
-      buttons.find((button) => button.textContent?.includes(titulo))!.click();
-      expect(open).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ data: titulo }));
+  it('abre registro desde el encabezado y envía al login las acciones de reporte sin sesión', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter(routes)] });
+    const router = TestBed.inject(Router);
+    const harness = await RouterTestingHarness.create('/');
+    harness.routeNativeElement!.querySelector<HTMLAnchorElement>('.register-button')!.click();
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/registro');
+
+    for (const selector of ['.report-button', '.hero-link', '.feature-report']) {
+      await harness.navigateByUrl('/');
+      harness.routeNativeElement!.querySelector<HTMLAnchorElement>(selector)!.click();
+      await harness.fixture.whenStable();
+      const url = router.parseUrl(router.url);
+      expect(url.root.children['primary'].segments.map(segment => segment.path)).toEqual(['login']);
+      expect(url.queryParams['destino']).toBe('/ciudadano/reportes/nuevo');
     }
   });
 });

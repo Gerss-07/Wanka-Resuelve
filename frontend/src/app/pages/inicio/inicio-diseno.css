@@ -30,8 +30,8 @@ p { line-height: 1.75; }
 .feature-layout { align-items: end; }
 .feature h2 { max-width: 680px; }
 .feature p { max-width: 470px; }
-.feature a { color: #b3efdf; }
-.feature-report { display: inline-flex; align-items: center; gap: .8rem; min-height: 48px; margin-top: 1.5rem; padding: 0 1.2rem; border: 1px solid #b3efdf; border-radius: 6px; color: #fff; background: transparent; font-weight: 700; cursor: pointer; }
+.feature a:not(.feature-report) { color: #b3efdf; }
+.feature-report { display: inline-flex; align-items: center; gap: .8rem; min-height: 48px; margin-top: 1.5rem; padding: 0 1.2rem; border: 1px solid #b3efdf; border-radius: 6px; color: #fff; background: transparent; font-weight: 700; text-decoration: none; cursor: pointer; }
 .feature-report:hover { background: #23545a; }
 .news { background: #fff; }
 .news-grid { gap: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
