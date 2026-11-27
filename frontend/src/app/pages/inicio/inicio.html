@@ -1,0 +1,114 @@
+<app-header />
+
+<main>
+  <section class="hero" data-enter aria-label="Lugares de Huancayo y el Valle del Mantaro" aria-roledescription="carrusel" (touchstart)="iniciarToque($event)" (touchend)="terminarToque($event)" (keydown.arrowleft)="cambiar(-1)" (keydown.arrowright)="cambiar(1)">
+    @for (slide of diapositivas; track slide.imagen; let i = $index) {
+      <div class="slide" [class.active]="i === actual" [attr.aria-hidden]="i !== actual">
+        <img [src]="slide.imagen" [alt]="i === actual ? slide.alt : ''" [attr.loading]="i === 0 ? 'eager' : 'lazy'" [attr.fetchpriority]="i === 0 ? 'high' : 'auto'" width="960" height="540">
+      </div>
+    }
+    <div class="container hero-content" aria-live="polite">
+      <span class="hero-kicker">{{ diapositivas[actual].lugar }}</span>
+      <h1>{{ diapositivas[actual].titulo }}</h1>
+      <p>{{ diapositivas[actual].descripcion }}</p>
+      <div class="hero-actions"><a class="hero-link" routerLink="/login" [queryParams]="{ destino: '/ciudadano/reportes/nuevo' }">Reportar incidencia <svg lucideArrowRight [size]="18"></svg></a><a class="hero-button" href="#como-funciona">Cómo funciona <span aria-hidden="true">↗</span></a></div>
+    </div>
+    <div class="container carousel-controls">
+      <div class="carousel-dots">@for (slide of diapositivas; track slide.imagen; let i = $index) { <button type="button" [class.selected]="i === actual" [attr.aria-label]="'Ir a imagen ' + (i + 1)" [attr.aria-current]="i === actual ? 'true' : null" (click)="actual = i"></button> }</div>
+      <div class="carousel-arrows"><button type="button" aria-label="Imagen anterior" (click)="cambiar(-1)">←</button><button type="button" aria-label="Imagen siguiente" (click)="cambiar(1)">→</button></div>
+    </div>
+  </section>
+
+  <section class="introduction" aria-labelledby="introduccion-titulo">
+    <div class="container intro-layout">
+      <div><span class="overline">UNA CIUDAD QUE COMPARTIMOS</span><h2 id="introduccion-titulo">Cada lugar tiene una historia. Ayudemos a cuidar la nuestra.</h2></div>
+      <div class="intro-copy"><p>Wanka Resuelve es una iniciativa universitaria independiente que propone organizar reportes sobre incidencias urbanas en Huancayo, El Tambo y Chilca.</p><a href="#como-funciona">Conoce la propuesta <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </section>
+
+  <section class="section categories" id="categorias">
+    <div class="container">
+      <div class="section-heading"><div><span class="overline">NUESTRO ENTORNO</span><h2>Los retos de nuestra ciudad</h2></div><p>Una ciudad que cuidamos entre todos comienza por prestar atención a lo que nos rodea.</p></div>
+      <div class="row g-3">
+        <div class="col-sm-6 col-lg"><article class="category-card"><span class="icon-box"><svg lucideTrash2></svg></span><h3>Limpieza pública y residuos</h3><p>Espacios más limpios para compartir.</p></article></div>
+        <div class="col-sm-6 col-lg"><article class="category-card"><span class="icon-box blue"><svg lucideFootprints></svg></span><h3>Pistas y veredas</h3><p>Vías y espacios para transitar mejor.</p></article></div>
+        <div class="col-sm-6 col-lg"><article class="category-card"><span class="icon-box orange"><svg lucideTrafficCone></svg></span><h3>Semáforos y señalización</h3><p>Señales que orientan nuestro camino.</p></article></div>
+        <div class="col-sm-6 col-lg"><article class="category-card"><span class="icon-box"><svg lucideLeaf></svg></span><h3>Parques y áreas verdes</h3><p>Lugares públicos que nos reúnen.</p></article></div>
+        <div class="col-sm-6 col-lg"><article class="category-card"><span class="icon-box blue"><svg lucideDroplets></svg></span><h3>Drenaje y alcantarillas</h3><p>Infraestructura que debemos cuidar.</p></article></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feature">
+    <div class="container feature-layout">
+      <div><span class="feature-kicker">UNA IDEA CON PROPÓSITO</span><h2>Una mirada más cercana a nuestro entorno.</h2></div>
+      <div><p>Desde pistas y residuos hasta parques y drenaje, la propuesta busca reunir información para facilitar el seguimiento de cada reporte.</p><a href="#como-funciona">Descubre el recorrido <span aria-hidden="true">↗</span></a><small>Registro y seguimiento previstos; aún en desarrollo.</small><a class="feature-report" routerLink="/login" [queryParams]="{ destino: '/ciudadano/reportes/nuevo' }">Reportar incidencia <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </section>
+
+  <section class="section news" id="noticias">
+    <div class="container">
+      <div class="section-heading"><div><span class="overline">CONTEXTO LOCAL</span><h2>Huancayo: noticias y problemáticas urbanas</h2></div><p>Una selección editorial de publicaciones públicas para conocer nuestro entorno. Las fechas corresponden a las fuentes originales.</p></div>
+      <div class="news-grid">
+        @for (noticia of noticias; track noticia.url) {
+          <article class="news-card">
+            <span class="news-topic">{{ noticia.tema }}</span>
+            <p class="news-date">{{ noticia.fuente }} · {{ noticia.fecha }}</p>
+            <h3>{{ noticia.titulo }}</h3><p>{{ noticia.resumen }}</p>
+            <a [href]="noticia.url" target="_blank" rel="noopener noreferrer">Leer noticia <span aria-hidden="true">↗</span><span class="visually-hidden"> (se abre en una nueva pestaña)</span></a>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section gallery" id="galeria">
+    <div class="container">
+      <div class="section-heading"><div><span class="overline">EL LUGAR QUE COMPARTIMOS</span><h2>Una mirada a nuestro valle.</h2></div><p>Espacios y paisajes que forman parte de nuestro entorno compartido. Fotografías históricas de sus autores en Wikimedia Commons.</p></div>
+      <div class="gallery-grid">
+        <figure class="gallery-item gallery-large"><img src="/images/plaza-constitucion.jpg" alt="Plaza de la Constitución de Huancayo y su catedral" loading="lazy" width="960" height="540"><figcaption><span>HUANCAYO</span><strong>Plaza de la Constitución</strong></figcaption></figure>
+        <figure class="gallery-item"><img src="/images/valle-mantaro.jpg" alt="Paisaje del Valle del Mantaro" loading="lazy" width="960" height="644"><figcaption><span>JUNÍN</span><strong>Valle del Mantaro</strong></figcaption></figure>
+        <figure class="gallery-item"><img src="/images/huancayo-catedral.jpg" alt="Catedral y plaza de Huancayo" loading="lazy" width="960" height="582"><figcaption><span>HUANCAYO</span><strong>Un espacio para encontrarnos</strong></figcaption></figure>
+      </div>
+      <a class="gallery-credit" href="#creditos">Ver créditos de las fotografías ↗</a>
+    </div>
+  </section>
+
+  <section class="section process" id="como-funciona">
+    <div class="container">
+      <div class="center-heading"><span class="overline">EL RECORRIDO PREVISTO</span><h2>De la observación al seguimiento.</h2><p>Tres pasos para organizar la información de una incidencia.</p></div>
+      <div class="row g-4 steps">
+        <div class="col-md-4"><article><span class="step-number">01 <svg lucideMapPin></svg></span><h3>El ciudadano reporta</h3><p>Describe la incidencia, indica la ubicación y adjunta fotografías.</p></article></div>
+        <div class="col-md-4"><article><span class="step-number">02 <svg lucideTrafficCone></svg></span><h3>El operador revisa</h3><p>Revisa y gestiona el reporte según su estado en el prototipo.</p></article></div>
+        <div class="col-md-4"><article><span class="step-number">03 <svg lucideArrowRight></svg></span><h3>El ciudadano da seguimiento</h3><p>Consulta el estado, el historial y el resultado registrado.</p></article></div>
+      </div>
+      <p class="process-note">Estas funcionalidades forman parte del alcance previsto y aún están en desarrollo.</p>
+    </div>
+  </section>
+
+  <section class="section benefits" aria-labelledby="benefits-title">
+    <div class="container benefits-layout">
+      <div><span class="overline">UNA IDEA CON PROPÓSITO</span><h2 id="benefits-title">Hacer visible lo que importa.</h2></div>
+      <div class="benefits-copy"><p>Wanka Resuelve plantea una forma ordenada de compartir información sobre el entorno y conocer el recorrido de cada reporte.</p><div class="benefit-tags"><span>Participación ciudadana</span><span>Información organizada</span><span>Seguimiento del reporte</span></div><small>Funciones previstas para la simulación; aún en desarrollo.</small></div>
+    </div>
+  </section>
+
+  <section class="section districts" id="distritos">
+    <div class="container">
+      <div class="district-intro"><span class="overline">CERCA DE TI</span><h2>Una visión compartida para nuestro valle.</h2><p>El alcance previsto comprende tres distritos de la provincia de Huancayo.</p></div>
+      <div class="district-cards">
+        <article class="district-card"><div><svg lucideMapPin></svg><span>01 / DISTRITO</span><h3>Huancayo</h3><p>Espacios y calles que forman parte de la vida cotidiana de la ciudad.</p></div></article>
+        <article class="district-card"><div><svg lucideMapPin></svg><span>02 / DISTRITO</span><h3>El Tambo</h3><p>Un distrito que reúne barrios, espacios públicos y paisajes del valle.</p></div></article>
+        <article class="district-card"><div><svg lucideMapPin></svg><span>03 / DISTRITO</span><h3>Chilca</h3><p>Un distrito que también forma parte de nuestro entorno compartido.</p></div></article>
+      </div>
+    </div>
+  </section>
+  <section class="section faq" id="preguntas"><div class="container faq-layout"><div><span class="overline">RESOLVEMOS TUS DUDAS</span><h2>Preguntas frecuentes.</h2><p>Conoce el alcance de esta iniciativa universitaria.</p></div><div>
+    <details><summary>¿Qué es Wanka Resuelve?</summary><p>Es un proyecto universitario independiente que simula el registro y seguimiento de incidencias urbanas.</p></details>
+    <details><summary>¿Qué incidencias se pueden reportar?</summary><p>El alcance previsto comprende residuos sólidos, pistas y veredas, señalización, parques y áreas verdes, y drenaje y alcantarillas.</p></details>
+    <details><summary>¿En qué distritos está disponible?</summary><p>La simulación está diseñada para Huancayo, El Tambo y Chilca. Las funciones de reporte aún están en desarrollo.</p></details>
+    <details><summary>¿Cómo puedo consultar mis reportes?</summary><p>Se prevé que cada ciudadano consulte sus propios reportes tras iniciar sesión. Esta funcionalidad todavía no está disponible.</p></details>
+    <details><summary>¿Wanka Resuelve pertenece a una municipalidad?</summary><p>No. Es un proyecto universitario independiente y no sustituye canales oficiales ni servicios de emergencia.</p></details>
+  </div></div></section>
+</main>
+<app-footer />

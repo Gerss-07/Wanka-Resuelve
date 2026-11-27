@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+uploads/
 
 # Variables de entorno
 .env
@@ -11,6 +12,7 @@ venv/
 
 # Angular
 frontend/node_modules/
+node_modules/
 frontend/dist/
 frontend/.angular/
 frontend/coverage/

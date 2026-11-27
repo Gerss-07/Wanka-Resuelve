@@ -1,0 +1,36 @@
+<main class="acceso">
+  <section class="bienvenida">
+    <a routerLink="/" class="marca" aria-label="Ir al inicio de Wanka Resuelve"><img src="/images/logo-wanka-resuelve.png" alt="Wanka Resuelve"></a>
+    <div class="bienvenida-texto"><span>PARTICIPACIÓN CIUDADANA</span><h1>Bienvenido a<br>Wanka Resuelve.</h1><p class="lema">Cada reporte cuenta.</p><p>Una propuesta para compartir información sobre nuestro entorno y cuidar juntos la ciudad que habitamos.</p></div>
+    <p class="lugares">HUANCAYO · EL TAMBO · CHILCA</p>
+  </section>
+  <section class="formulario" aria-labelledby="acceso-titulo"><div class="contenido">
+    <a routerLink="/" class="volver">← Volver al inicio</a>
+    <p class="etiqueta">WANKA RESUELVE</p>
+    <h2 id="acceso-titulo">Iniciar sesión</h2>
+    <p class="intro">Ingresa tus datos para acceder a tu cuenta.</p>
+    <form (submit)="enviar($event)" novalidate>
+      <label for="correo">Correo electrónico</label>
+      <input id="correo" type="email" [formField]="formulario.correo" autocomplete="email" aria-describedby="correo-errores">
+      <div id="correo-errores">
+        @if (formulario.correo().invalid() && formulario.correo().touched()) {
+          @for (e of formulario.correo().errors(); track $index) { <small>{{ e.message }}</small> }
+        }
+      </div>
+      <label for="contrasena">Contraseña</label>
+      <div class="clave">
+        <input id="contrasena" [type]="visible() ? 'text' : 'password'" [formField]="formulario.contrasena" autocomplete="current-password" aria-describedby="contrasena-errores">
+        <button type="button" (click)="visible.set(!visible())" [attr.aria-label]="visible() ? 'Ocultar contraseña' : 'Mostrar contraseña'">{{ visible() ? 'Ocultar' : 'Mostrar' }}</button>
+      </div>
+      <div id="contrasena-errores">
+        @if (formulario.contrasena().invalid() && formulario.contrasena().touched()) {
+          @for (e of formulario.contrasena().errors(); track $index) { <small>{{ e.message }}</small> }
+        }
+      </div>
+      @if (errorEnvio()) { <small role="alert">{{ errorEnvio() }}</small> }
+      <button class="principal" type="submit" [disabled]="formulario().invalid() || enviando()">{{ enviando() ? 'Ingresando…' : 'Iniciar sesión' }}</button>
+    </form>
+    <p class="cambio">¿No tienes cuenta? <a routerLink="/registro">Regístrate</a></p>
+    <p class="nota">Simulación académica — no es un canal oficial de emergencias.</p>
+  </div></section>
+</main>
