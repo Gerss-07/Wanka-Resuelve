@@ -11,7 +11,7 @@ const INICIO_POR_ROL: Record<RolDev, string> = { ciudadano: '/ciudadano/reportes
   selector: 'app-layout',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideClipboardList, LucidePlusCircle],
   templateUrl: './layout.html',
-  styleUrls: ['./layout.scss', './panel.scss'],
+  styleUrls: ['./layout.css', './panel.css'],
   encapsulation: ViewEncapsulation.None,
 })
 export class Layout {
