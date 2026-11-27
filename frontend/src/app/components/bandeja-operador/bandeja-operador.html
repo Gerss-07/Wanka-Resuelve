@@ -1,0 +1,111 @@
+<header class="op-encabezado bienvenida">
+  <div>
+    <p class="territorio">Huancayo · El Tambo · Chilca</p>
+    <h1>Panel del operador</h1>
+    <p class="op-intro">Supervisión y gestión de incidencias urbanas.</p>
+  </div>
+</header>
+
+<app-resumen-operador [reportes]="cargando() || error() ? null : reportes()"
+  [cargando]="cargando()" [estados]="estados" />
+
+<section class="op-tarjeta op-pad filtros" aria-labelledby="filtros">
+  <h2 id="filtros" tabindex="-1"><svg lucideSlidersHorizontal [size]="20" aria-hidden="true"></svg> Filtros de incidencias</h2>
+  @if (errorCatalogos()) {
+    <p class="op-error" role="alert">{{ errorCatalogos() }}</p>
+    <button type="button" (click)="cargarCatalogos()">Recargar catálogos</button>
+  }
+  <form (submit)="aplicar($event)" novalidate>
+    <fieldset [disabled]="cargando()">
+      <div class="campos">
+        <div class="op-campo">
+          <label for="estado">Estado</label>
+          <select id="estado" [formField]="filtros.estado">
+            <option value="">Todos</option>
+            @for (estado of estados; track estado.valor) { <option [value]="estado.valor">{{ estado.nombre }}</option> }
+          </select>
+        </div>
+        <div class="op-campo">
+          <label for="categoria">Categoría</label>
+          <select id="categoria" [formField]="filtros.idCategoria">
+            <option value="">{{ cargandoCatalogos() ? 'Cargando…' : 'Todas' }}</option>
+            @for (categoria of categorias(); track categoria.id) { <option [value]="categoria.id">{{ categoria.nombre }}</option> }
+          </select>
+        </div>
+        <div class="op-campo">
+          <label for="distrito">Distrito</label>
+          <select id="distrito" [formField]="filtros.idDistrito">
+            <option value="">{{ cargandoCatalogos() ? 'Cargando…' : 'Todos' }}</option>
+            @for (distrito of distritos(); track distrito.id) { <option [value]="distrito.id">{{ distrito.nombre }}</option> }
+          </select>
+        </div>
+        <div class="op-campo">
+          <label for="desde">Fecha desde</label>
+          <input id="desde" type="date" [formField]="filtros.fechaDesde">
+        </div>
+        <div class="op-campo">
+          <label for="hasta">Fecha hasta</label>
+          <input id="hasta" type="date" [formField]="filtros.fechaHasta"
+            [attr.aria-invalid]="filtros.fechaHasta().touched() && filtros.fechaHasta().invalid() ? 'true' : null"
+            [attr.aria-describedby]="filtros.fechaHasta().touched() && filtros.fechaHasta().invalid() ? 'error-hasta' : null">
+          @if (filtros.fechaHasta().touched() && filtros.fechaHasta().errors()[0]; as errorFecha) {
+            <small class="op-error" id="error-hasta" role="alert">{{ errorFecha.message }}</small>
+          }
+        </div>
+      </div>
+      <div class="botones">
+        <button class="op-primario" type="submit">Aplicar filtros</button>
+        <button type="button" (click)="limpiar()">Limpiar filtros</button>
+      </div>
+    </fieldset>
+  </form>
+</section>
+
+<section class="op-tarjeta resultados" aria-labelledby="resultados">
+  <header class="op-pad">
+    <h2 id="resultados" tabindex="-1"><svg lucideClipboardList [size]="21" aria-hidden="true"></svg> Tabla de incidencias</h2>
+    @if (cargando()) {
+      <p class="op-intro" role="status"><span class="op-spinner" aria-hidden="true"></span>Cargando reportes…</p>
+    } @else if (!error()) {
+      <p class="op-intro" role="status">{{ reportesVisibles().length }} {{ reportesVisibles().length === 1 ? 'resultado' : 'resultados' }}
+        @if (codigo()) { · Código: <strong>{{ codigo() }}</strong> }</p>
+    }
+    @if (codigo()) {
+      <a class="op-enlace" [routerLink]="[]" [queryParams]="{ codigo: null }" queryParamsHandling="merge" fragment="resultados">Quitar búsqueda</a>
+    }
+  </header>
+  @if (error()) {
+    <div class="op-pad estado">
+      <p class="op-error" role="alert">{{ error() }}</p>
+      <button type="button" (click)="cargar()">Reintentar consulta</button>
+    </div>
+  } @else if (!cargando()) {
+    @if (reportesVisibles().length) {
+      <div class="tabla" role="region" aria-label="Tabla de reportes: desplaza para ver todas las columnas" tabindex="0">
+        <table aria-labelledby="resultados">
+          <thead><tr>
+            <th scope="col">Código</th><th scope="col">Ciudadano</th><th scope="col">Categoría</th><th scope="col">Distrito</th>
+            <th scope="col">Estado</th><th scope="col">Fecha</th><th scope="col">Prioridad</th><th scope="col">Acciones</th>
+          </tr></thead>
+          <tbody>
+            @for (r of reportesVisibles(); track r.id) {
+              <tr>
+                <th scope="row">{{ r.codigo }}</th><td>{{ r.ciudadano }}</td><td>{{ r.categoria.nombre }}</td>
+                <td>{{ r.distrito.nombre }}</td><td><app-estado-badge [estado]="r.estado" /></td>
+                <td><time [attr.datetime]="r.fechaCreacion">{{ r.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</time></td>
+                <td><span class="prioridad" [attr.data-prioridad]="r.prioridad">{{ (r.prioridad | titlecase) || 'Sin asignar' }}</span></td>
+                <td>
+                  <a class="op-enlace detalle" [routerLink]="[r.id]" queryParamsHandling="preserve" [attr.aria-label]="'Ver detalle de ' + r.codigo">
+                    Ver <svg lucideArrowUpRight [size]="15" aria-hidden="true"></svg>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="op-pad estado">{{ codigo() ? 'No se encontraron reportes con ese código y los filtros aplicados.' : 'No hay reportes para los filtros aplicados.' }}</p>
+    }
+  }
+</section>

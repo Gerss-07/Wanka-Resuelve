@@ -1,0 +1,32 @@
+.volver { margin: 0 0 10px -8px; text-decoration: none; }
+.encabezado-revision { border-left: 4px solid var(--op-naranja); padding: 7px 13px; background: #eaf3ff; border-radius: 0 12px 12px 0; }
+.titulo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 6px; }
+.revision { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(270px, 1fr); align-items: start; gap: 16px; }
+.gestion { display: grid; gap: 16px; grid-column: 2; grid-row: 1 / span 2; min-width: 0; }
+.ubicacion, .fotografias, .cronologia { grid-column: 1; }
+h2 { display: flex; align-items: center; gap: 8px; }
+h2 svg { color: var(--op-accent); flex: none; }
+dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 16px 0 0; }
+dt { color: var(--op-muted); font-size: .8rem; font-weight: 800; }
+dd { margin: 3px 0 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.ancho { grid-column: 1 / -1; }
+.evidencia h2 { margin-bottom: 12px; }
+.fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(145px, 100%), 1fr)); gap: 10px; }
+.fotos p { grid-column: 1 / -1; }
+.fotos a { position: relative; display: block; border: 1px solid var(--op-line); border-radius: 12px; overflow: hidden; background: var(--op-surface); }
+.fotos img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform .18s ease-out; }
+.fotos a span { position: absolute; bottom: 9px; left: 9px; padding: 4px 9px; border-radius: 8px; background: #14233f; color: white; font-size: .75rem; font-weight: 800; }
+.fotos a:hover img { transform: scale(1.03); }
+.historial { margin: 14px 0 0; padding-left: 22px; }
+.historial li { padding-block: 10px; border-bottom: 1px solid var(--op-line); overflow-wrap: anywhere; }
+.historial li:last-child { border-bottom: 0; padding-bottom: 0; }
+.historial p { margin-bottom: 0; white-space: pre-wrap; }
+.cambio { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.op-exito:empty { margin: 0; }
+@media (max-width: 1080px) {
+  .revision { grid-template-columns: minmax(0, 1fr); }
+  .gestion { grid-column: auto; grid-row: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fotos img { transition: none; }
+}

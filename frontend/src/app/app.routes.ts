@@ -21,5 +21,6 @@ export const routes: Routes = [
       { path: 'reportes/:id', title: 'Detalle del reporte · Wanka Resuelve', loadComponent: () => import('./components/reporte-detalle/reporte-detalle').then(m => m.ReporteDetalle) },
     ],
   },
+  { path: 'operador', loadChildren: () => import('./components/operador-layout/operador.routes').then(m => m.rutasOperador) },
   { path: '**', redirectTo: '' },
 ];

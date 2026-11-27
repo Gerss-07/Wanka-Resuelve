@@ -1,0 +1,43 @@
+<a class="op-salto" href="#contenido-operador" (click)="enfocarContenido($event, contenido)">Saltar al contenido</a>
+<aside id="op-navegacion" class="op-lateral" [class.op-compacto]="compacto()">
+  <a routerLink="/operador/reportes" class="op-marca" aria-label="Wanka Resuelve: Dashboard" title="Wanka Resuelve">
+    <img src="/images/logo-wanka-operador.png" width="360" height="203" alt="Wanka Resuelve">
+  </a>
+  <nav aria-label="Navegación del operador">
+    <span class="op-etiqueta">Operación</span>
+    <a routerLink="/operador/reportes" queryParamsHandling="preserve" class="op-menu" aria-label="Dashboard"
+      (click)="enfocarSiActiva('dashboard')"
+      [attr.aria-current]="seccion() === 'dashboard' ? 'location' : null" title="Dashboard">
+      <svg lucideLayoutDashboard [size]="20" aria-hidden="true"></svg><span>Dashboard</span>
+    </a>
+    <a routerLink="/operador/reportes" fragment="resultados" queryParamsHandling="preserve" class="op-menu" aria-label="Reportes"
+      (click)="enfocarSiActiva('resultados')"
+      [attr.aria-current]="seccion() === 'resultados' ? 'location' : null" title="Reportes">
+      <svg lucideClipboardList [size]="20" aria-hidden="true"></svg><span>Reportes</span>
+    </a>
+    <a routerLink="/operador/reportes" fragment="filtros" queryParamsHandling="preserve" class="op-menu" aria-label="Gestión de incidencias"
+      (click)="enfocarSiActiva('filtros')"
+      [attr.aria-current]="seccion() === 'filtros' || seccion() === 'detalle' ? 'location' : null" title="Gestión de incidencias">
+      <svg lucideSlidersHorizontal [size]="20" aria-hidden="true"></svg><span>Gestión de incidencias</span>
+    </a>
+  </nav>
+</aside>
+<div class="op-area">
+  <header class="op-barra">
+    <div class="op-contexto">
+      <button class="op-contraer" type="button" aria-controls="op-navegacion" [attr.aria-expanded]="!compacto()"
+        [attr.aria-label]="compacto() ? 'Expandir navegación' : 'Contraer navegación'" (click)="compacto.set(!compacto())">
+        <svg lucidePanelLeft [size]="19" aria-hidden="true"></svg>
+      </button>
+      <svg class="op-pin" lucideMapPin [size]="19" aria-hidden="true"></svg>
+      <strong>{{ titulo() }}</strong>
+    </div>
+    <form class="op-busqueda" role="search" aria-label="Buscar reportes" (submit)="buscar($event)">
+      <input type="search" aria-label="Código de reporte" placeholder="Buscar por código de reporte" [formField]="formulario.codigo">
+      <button type="submit" aria-label="Buscar reporte"><svg lucideSearch [size]="19" aria-hidden="true"></svg></button>
+    </form>
+  </header>
+  <main #contenido id="contenido-operador" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>

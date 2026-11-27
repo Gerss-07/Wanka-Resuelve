@@ -1,0 +1,79 @@
+<a class="op-enlace volver" routerLink="/operador/reportes" fragment="resultados" queryParamsHandling="preserve">
+  <svg lucideArrowLeft [size]="18" aria-hidden="true"></svg> Volver a reportes
+</a>
+@if (conflicto()) {
+  <p class="op-error" role="alert">{{ conflicto() }}</p>
+}
+@if (cargando()) {
+  <h1>Revisión del reporte</h1>
+  <p class="op-intro" role="status"><span class="op-spinner" aria-hidden="true"></span>Cargando reporte…</p>
+} @else if (error()) {
+  <h1>Revisión del reporte</h1>
+  <p class="op-error" role="alert">{{ error() }}</p>
+  <button type="button" (click)="cargar()">Reintentar consulta</button>
+} @else if (reporte(); as r) {
+  <header class="op-encabezado encabezado-revision">
+    <p class="op-intro">Revisión de incidencia</p>
+    <div class="titulo"><h1>{{ r.codigo }}</h1><app-estado-badge [estado]="r.estado" /></div>
+  </header>
+  <p class="op-exito" role="status">{{ confirmacion() }}</p>
+  <div class="revision">
+      <section class="op-tarjeta op-pad">
+        <h2><svg lucideFileText [size]="21" aria-hidden="true"></svg> Información general</h2>
+        <dl>
+          <div><dt>Ciudadano</dt><dd>{{ r.ciudadano }}</dd></div>
+          <div><dt>Categoría</dt><dd>{{ r.categoria.nombre }}</dd></div>
+          <div><dt>Distrito</dt><dd>{{ r.distrito.nombre }}</dd></div>
+          <div><dt>Dirección o referencia</dt><dd>{{ r.referencia }}</dd></div>
+          <div class="ancho"><dt>Descripción</dt><dd>{{ r.descripcion }}</dd></div>
+          <div><dt>Creación</dt><dd><time [attr.datetime]="r.fechaCreacion">{{ r.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</time></dd></div>
+          <div><dt>Última actualización</dt><dd><time [attr.datetime]="r.fechaActualizacion">{{ r.fechaActualizacion | date:'dd/MM/yyyy HH:mm' }}</time></dd></div>
+          @if (r.motivoRechazo) { <div class="ancho"><dt>Motivo de rechazo</dt><dd>{{ r.motivoRechazo }}</dd></div> }
+          @if (r.comentarioSolucion) { <div class="ancho"><dt>Solución</dt><dd>{{ r.comentarioSolucion }}</dd></div> }
+        </dl>
+      </section>
+      <div class="gestion">
+        <section class="op-tarjeta op-pad">
+          <h2><svg lucideBuilding2 [size]="21" aria-hidden="true"></svg> Asignación</h2>
+          <dl>
+            <div class="ancho"><dt>Entidad responsable</dt><dd>{{ r.entidad || 'Sin asignar' }}</dd></div>
+            <div class="ancho"><dt>Prioridad</dt><dd><span class="prioridad" [attr.data-prioridad]="r.prioridad">{{ (r.prioridad | titlecase) || 'Sin asignar' }}</span></dd></div>
+          </dl>
+        </section>
+        <app-acciones-operador [reporte]="r" (actualizado)="actualizado($event)" (conflicto)="actualizarTrasConflicto($event)" />
+      </div>
+      <section class="op-tarjeta op-pad evidencia ubicacion">
+        <h2><svg lucideMapPin [size]="21" aria-hidden="true"></svg> Ubicación</h2>
+        <app-mapa-selector [punto]="{ latitud: r.latitud, longitud: r.longitud }" [soloLectura]="true" />
+        <p class="op-intro">Latitud: {{ r.latitud }} · Longitud: {{ r.longitud }}</p>
+      </section>
+      <section class="op-tarjeta op-pad evidencia fotografias">
+        <h2><svg lucideImage [size]="21" aria-hidden="true"></svg> Fotografías</h2>
+        <div class="fotos">
+          @for (foto of r.fotos; track foto.id; let i = $index) {
+            <a [href]="foto.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Abrir fotografía ' + (i + 1) + ' en una nueva pestaña'">
+              <img [src]="foto.url" [alt]="'Fotografía de la incidencia ' + (i + 1)" loading="lazy" decoding="async">
+              <span aria-hidden="true">Abrir foto {{ i + 1 }}</span>
+            </a>
+          } @empty { <p class="op-intro">El reporte no tiene fotografías.</p> }
+        </div>
+      </section>
+      <section class="op-tarjeta op-pad cronologia">
+        <h2><svg lucideClock [size]="21" aria-hidden="true"></svg> Historial de estados</h2>
+        <ol class="historial">
+          @for (cambio of r.historial; track $index) {
+            <li>
+              <div class="cambio">
+                @if (cambio.anterior; as anterior) {
+                  <app-estado-badge [estado]="anterior" /><span aria-label="a">→</span>
+                }
+                <app-estado-badge [estado]="cambio.nuevo" />
+              </div>
+              <div class="op-intro">{{ cambio.usuario }} · <time [attr.datetime]="cambio.fecha">{{ cambio.fecha | date:'dd/MM/yyyy HH:mm' }}</time></div>
+              @if (cambio.comentario) { <p>{{ cambio.comentario }}</p> }
+            </li>
+          } @empty { <li>No hay cambios registrados.</li> }
+        </ol>
+      </section>
+  </div>
+}

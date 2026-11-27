@@ -21,8 +21,7 @@
   <main id="contenido-ciudadano" tabindex="-1">
     <router-outlet />
   </main>
-  <footer class="panel-aviso">
-    <span>Simulación académica — no es un canal oficial de emergencias</span>
-    @if (modoDesarrollo) { <span>Identidad temporal de desarrollo</span> }
-  </footer>
+  @if (modoDesarrollo) {
+    <footer class="panel-aviso"><span>Identidad temporal de desarrollo</span></footer>
+  }
 </div>

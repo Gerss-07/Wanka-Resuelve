@@ -1,0 +1,47 @@
+:host { display: block; margin-bottom: 16px; }
+.indicadores, .graficos { display: grid; gap: 14px; }
+.indicadores { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 16px; }
+.indicador { display: flex; align-items: center; gap: 12px; min-height: 94px; padding: 13px; transition: transform .18s, box-shadow .18s; }
+.indicador:hover { transform: translateY(-2px); box-shadow: 0 11px 24px #143f7c16; }
+.indicador dt { color: var(--op-muted); font-size: .8rem; font-weight: 800; }
+.indicador dd { color: var(--op-ink); font-size: 1.75rem; font-weight: 800; line-height: 1.15; margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+.icono { display: grid; place-items: center; flex: 0 0 48px; height: 48px; border-radius: 50%; background: var(--op-azul-claro); color: var(--op-accent); }
+.indicador:nth-child(2) .icono { background: #fff0e1; color: #a45308; }
+.indicador:nth-child(3) .icono { background: #e2f8f4; color: #007d70; }
+.indicador:nth-child(4) .icono { background: #e2f6ea; color: #157347; }
+.graficos { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.cabecera { display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 8px; }
+.cabecera select { width: auto; max-width: 100%; }
+h2 { display: flex; align-items: center; gap: 8px; }
+h2 svg { color: var(--op-accent); flex: none; }
+.op-intro { font-size: .82rem; }
+.eje { overflow-x: auto; padding: 10px 5px 2px; }
+ul { padding: 0; margin: 0; list-style: none; }
+.meses { display: grid; grid-template-columns: repeat(var(--meses), minmax(54px, 1fr)); gap: 7px; }
+.columna { display: flex; align-items: end; justify-content: center; height: 138px; border-bottom: 1px solid #b8cce6; background: repeating-linear-gradient(to top, transparent 0 33px, #edf2f9 33px 34px); padding: 20px 0 0; }
+.columna .barra { position: relative; width: min(82%, 68px); min-height: 12px; padding: 0; border: 0; border-radius: 7px 7px 0 0; color: white; background: linear-gradient(#2785f1, #0866dc); }
+.columna .barra.ultima { background: linear-gradient(var(--op-turquesa), #008577); }
+.columna .barra:hover, .columna .barra[aria-pressed='true'] { filter: brightness(.88); }
+.barra > strong { position: absolute; inset: auto 0 100%; color: var(--op-ink); }
+.tooltip { display: none; position: absolute; z-index: 2; inset: 4px 0 auto; margin-inline: auto; width: fit-content; max-width: 100%; padding: 3px; background: #14233f; border-radius: 5px; font-size: .68rem; line-height: 1.12; overflow-wrap: anywhere; }
+.barra:hover .tooltip, .barra:focus-visible .tooltip, .barra[aria-pressed='true'] .tooltip { display: block; }
+.mes { display: block; text-align: center; margin-top: 4px; font-size: .72rem; color: var(--op-muted); }
+.desglose { display: grid; grid-template-columns: minmax(100px, .9fr) minmax(140px, 1.1fr); align-items: center; gap: 10px; margin-top: 12px; }
+.dona { display: grid; place-items: center; justify-self: center; width: min(100%, 154px); aspect-ratio: 1; border-radius: 50%; background-color: #edf3fb; }
+.dona div { display: grid; place-content: center; width: 69%; height: 69%; border-radius: 50%; background: white; text-align: center; color: var(--op-muted); font-size: .72rem; }
+.dona strong { font-size: 1.35rem; line-height: 1.12; color: var(--op-ink); }
+.distribucion button { width: 100%; display: grid; grid-template-columns: 9px 1fr auto minmax(34px, auto); align-items: center; gap: 6px; text-align: left; padding: 3px; min-height: 36px; border-color: transparent; color: var(--op-ink); font-size: .78rem; font-weight: 650; }
+.distribucion button[aria-pressed='true'] { background: var(--op-azul-claro); border-color: #b9cce3; }
+.punto { width: 8px; height: 8px; border-radius: 50%; }
+.porcentaje { text-align: right; }
+.sin-datos { display: grid; justify-items: center; align-content: center; gap: 6px; min-height: 154px; margin-top: 12px; border: 1px dashed var(--op-line); border-radius: 12px; background: #f8faff; color: var(--op-muted); text-align: center; font-size: .84rem; }
+.sin-datos p { margin: 0 8px; }
+.sin-datos svg { color: var(--op-accent); }
+@media (max-width: 1120px) { .graficos { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+@media (max-width: 980px) { .indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (821px <= width <= 980px), (max-width: 640px) { .graficos { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .indicador { padding: 11px; min-height: 76px; gap: 8px; }
+  .icono { flex-basis: 36px; height: 36px; }
+}
+@media (prefers-reduced-motion: reduce) { .indicador { transition: none; } }

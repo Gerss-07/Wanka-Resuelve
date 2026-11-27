@@ -1,9 +1,10 @@
 import { CategoriaApi, DistritoApi, Catalogo } from './catalogo.interface';
 export type Estado = 'RECIBIDO' | 'ASIGNADO' | 'EN_ATENCION' | 'CERRADO' | 'RECHAZADO';
+export type Prioridad = 'BAJA' | 'MEDIA' | 'ALTA';
 export interface ReporteResumenApi {
   id_reporte: number; codigo: string; ciudadano: { id_usuario: number; nombre: string };
   categoria: CategoriaApi; distrito: DistritoApi; estado: Estado;
-  prioridad: 'BAJA' | 'MEDIA' | 'ALTA' | null; fecha_creacion: string;
+  prioridad: Prioridad | null; fecha_creacion: string;
 }
 export interface ReporteDetalleApi extends ReporteResumenApi {
   descripcion: string; referencia: string; latitud: number; longitud: number;
@@ -15,7 +16,7 @@ export interface ReporteDetalleApi extends ReporteResumenApi {
 }
 export interface ReporteResumen {
   id: number; codigo: string; ciudadano: string; categoria: Catalogo; distrito: Catalogo;
-  estado: Estado; prioridad: string | null; fechaCreacion: string;
+  estado: Estado; prioridad: Prioridad | null; fechaCreacion: string;
 }
 export interface ReporteDetalle extends ReporteResumen {
   descripcion: string; referencia: string; latitud: number; longitud: number; entidad: string | null;

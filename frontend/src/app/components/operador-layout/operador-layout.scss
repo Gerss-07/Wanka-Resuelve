@@ -1,0 +1,73 @@
+app-operador-layout {
+  --op-ink: #14233f;
+  --op-muted: #4d5e76;
+  --op-accent: #0866dc;
+  --op-azul-oscuro: #06458f;
+  --op-azul-claro: #e8f2ff;
+  --op-turquesa: #00bfa6;
+  --op-verde: #16a765;
+  --op-naranja: #ff8a24;
+  --op-line: #dce5f2;
+  --op-surface: #f3f6fc;
+  --op-gutter: clamp(18px, 2.6vw, 38px);
+  display: grid;
+  grid-template-columns: 228px minmax(0, 1fr);
+  min-height: 100dvh;
+  background: var(--op-surface);
+  color: var(--op-ink);
+
+  &:has(.op-compacto) { grid-template-columns: 78px minmax(0, 1fr); }
+  .op-area { display: flex; flex-direction: column; min-width: 0; }
+  .op-salto { position: fixed; top: 12px; left: 12px; z-index: 12; transform: translateY(-160%); background: white; padding: 8px 12px; }
+  .op-salto:focus { transform: none; }
+  .op-lateral {
+    position: sticky; top: 0; height: 100dvh; overflow: auto; padding: 22px 12px; isolation: isolate;
+    background: linear-gradient(164deg, #053876, #06458f 72%, #0866c5); color: white;
+  }
+  .op-lateral::after {
+    content: ''; position: absolute; inset: auto 0 0; height: min(30%, 240px); z-index: -1;
+    background: url('/images/valle-mantaro.jpg') center / cover;
+    mask-image: linear-gradient(transparent, black 82%); mix-blend-mode: luminosity; opacity: .28;
+  }
+  .op-marca { display: grid; place-items: center; min-height: 54px; margin: 0 8px 29px; border-radius: 14px; background: white; }
+  .op-marca img { display: block; width: 100%; height: auto; max-width: 166px; }
+  nav { display: grid; gap: 5px; }
+  .op-etiqueta { margin: 0 10px 6px; text-transform: uppercase; letter-spacing: .12em; font-size: .66rem; font-weight: 800; color: #c6defc; }
+  .op-menu {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; text-decoration: none;
+    line-height: 1.25; color: #f3f8ff;
+  }
+  .op-menu svg { flex: none; }
+  .op-menu:hover { background: #ffffff1f; }
+  .op-menu[aria-current] { background: var(--op-accent); box-shadow: inset 3px 0 #53e3d0; }
+  .op-lateral :focus-visible { outline-color: white; }
+  .op-compacto .op-marca { margin-inline: 0; }
+  .op-compacto .op-menu { justify-content: center; }
+  .op-compacto .op-menu span, .op-compacto .op-etiqueta { display: none; }
+  .op-barra {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 20px;
+    min-height: 68px; padding: 10px var(--op-gutter); background: #fffffffa; border-bottom: 1px solid var(--op-line);
+  }
+  .op-contexto { display: flex; gap: 10px; align-items: center; font-size: .93rem; }
+  .op-pin { color: var(--op-accent); flex: none; }
+  .op-busqueda { display: flex; align-items: center; position: relative; flex: 0 1 360px; }
+  main { flex: 1; width: min(100%, 1580px); margin-inline: auto; padding: 24px var(--op-gutter) 32px; }
+}
+
+@media (max-width: 820px) {
+  app-operador-layout, app-operador-layout:has(.op-compacto) { grid-template-columns: minmax(0, 1fr); }
+  app-operador-layout {
+    .op-lateral { position: static; height: auto; padding: 10px var(--op-gutter); }
+    .op-lateral::after { display: none; }
+    .op-marca, .op-compacto .op-marca { width: 108px; margin: 0 0 8px; }
+    nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .op-etiqueta { display: none; }
+    .op-menu, .op-compacto .op-menu { justify-content: center; text-align: center; gap: 5px; }
+    .op-compacto .op-menu span { display: inline; }
+    .op-menu svg { width: 16px; }
+    .op-lateral .op-menu { padding-inline: 4px; font-size: clamp(.68rem, 2.7vw, .86rem); }
+  }
+}
+@media (max-width: 520px) {
+  app-operador-layout .op-busqueda { flex-basis: 100%; }
+}

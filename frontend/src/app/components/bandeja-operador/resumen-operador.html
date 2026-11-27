@@ -1,0 +1,89 @@
+<section aria-label="Resumen de incidencias">
+  @let datos = resumen();
+  <dl class="indicadores">
+    <div class="op-tarjeta indicador">
+      <span class="icono"><svg lucideChartNoAxesColumn [size]="23" aria-hidden="true"></svg></span>
+      <div><dt>Total de incidencias</dt><dd>{{ datos?.total ?? '—' }}</dd></div>
+    </div>
+    <div class="op-tarjeta indicador">
+      <span class="icono"><svg lucideInbox [size]="23" aria-hidden="true"></svg></span>
+      <div><dt>Recibidas</dt><dd>{{ datos?.porEstado?.RECIBIDO ?? '—' }}</dd></div>
+    </div>
+    <div class="op-tarjeta indicador">
+      <span class="icono"><svg lucideClock [size]="23" aria-hidden="true"></svg></span>
+      <div><dt>En atención</dt><dd>{{ datos?.porEstado?.EN_ATENCION ?? '—' }}</dd></div>
+    </div>
+    <div class="op-tarjeta indicador">
+      <span class="icono"><svg lucideCircleCheck [size]="23" aria-hidden="true"></svg></span>
+      <div><dt>Cerradas</dt><dd>{{ datos?.porEstado?.CERRADO ?? '—' }}</dd></div>
+    </div>
+  </dl>
+  <div class="graficos">
+    <section class="op-tarjeta op-pad" aria-labelledby="por-mes">
+      <header class="cabecera">
+        <div>
+          <h2 id="por-mes"><svg lucideChartNoAxesColumn [size]="24" aria-hidden="true"></svg> Incidencias por mes</h2>
+          <p class="op-intro">Meses con registros en la consulta actual.</p>
+        </div>
+        @if (datos?.total) {
+          <select [formField]="seleccionPeriodo.meses" aria-label="Período del gráfico mensual">
+            <option value="3">Últimos 3 meses con datos</option>
+            <option value="6">Últimos 6 meses con datos</option>
+            <option value="12">Últimos 12 meses con datos</option>
+          </select>
+        }
+      </header>
+      @if (datos?.total && datos; as registro) {
+        <div class="eje" tabindex="0" role="region" aria-label="Barras mensuales">
+          <ul class="meses" [style.--meses]="registro.meses.length">
+            @for (mes of registro.meses; track mes.mes) {
+              <li>
+                <div class="columna">
+                  <button type="button" class="barra" [class.ultima]="$last" [style.height.%]="95 * mes.cantidad / registro.maximo"
+                    [attr.aria-label]="mes.nombre + ': ' + mes.cantidad + ' reportes'"
+                    [attr.aria-pressed]="mesActivo() === mes.mes"
+                    (click)="mesActivo.set(mesActivo() === mes.mes ? null : mes.mes)">
+                    <strong>{{ mes.cantidad }}</strong>
+                    <span class="tooltip" aria-hidden="true">{{ mes.nombre }} · {{ mes.cantidad }}</span>
+                  </button>
+                </div>
+                <span class="mes">{{ mes.nombre }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      } @else {
+        <div class="sin-datos">
+          <svg lucideChartNoAxesColumn [size]="32" aria-hidden="true"></svg>
+          <p>{{ cargando() ? 'Cargando cifras…' : datos ? 'La consulta no devolvió incidencias.' : 'No hay cifras disponibles.' }}</p>
+        </div>
+      }
+    </section>
+    <section class="op-tarjeta op-pad" aria-labelledby="por-estado">
+      <h2 id="por-estado"><svg lucideLayers [size]="24" aria-hidden="true"></svg> Incidencias por estado</h2>
+      <p class="op-intro">Distribución de los reportes de la consulta actual.</p>
+      <div class="desglose">
+        @let segmento = segmentoActivo();
+        <div class="dona" [style.background-image]="dona()">
+          <div><strong>{{ segmento?.cantidad ?? datos?.total ?? '—' }}</strong><span>{{ segmento?.nombre ?? 'Reportes' }}</span></div>
+        </div>
+        @if (datos) {
+          <ul class="distribucion">
+            @for (estado of distribucion(); track estado.valor) {
+              <li [attr.data-estado]="estado.valor">
+                <button type="button" [attr.aria-pressed]="estadoActivo() === estado.valor"
+                  (click)="estadoActivo.set(estadoActivo() === estado.valor ? null : estado.valor)">
+                  <span class="punto" [style.background]="estado.color" aria-hidden="true"></span>
+                  <span>{{ estado.nombre }}</span><strong>{{ estado.cantidad }}</strong>
+                  <span class="porcentaje">{{ estado.porcentaje }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="op-intro">{{ cargando() ? 'Cargando distribución…' : 'La distribución no está disponible.' }}</p>
+        }
+      </div>
+    </section>
+  </div>
+</section>

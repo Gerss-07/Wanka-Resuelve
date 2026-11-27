@@ -1,0 +1,45 @@
+.bienvenida {
+  display: flex; align-items: center; min-height: 132px; padding: 18px;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #eff5ff 30%, #eff5fff7 43%, #eff5ff00 88%), url('/images/huancayo-catedral.jpg') right 44% / 64% auto no-repeat, #eff5ff;
+}
+.bienvenida > div { border-left: 4px solid var(--op-naranja); padding-left: 15px; }
+.bienvenida .op-intro { font-size: .95rem; }
+.territorio { margin: 0 0 5px; color: var(--op-azul-oscuro); font-size: .72rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.filtros { margin-bottom: 16px; }
+h2 { display: flex; align-items: center; gap: 8px; scroll-margin-top: 15px; }
+h2 svg { color: var(--op-accent); flex: none; }
+.filtros h2 { margin-bottom: 14px; }
+.filtros > .op-error { margin-bottom: 8px; }
+.campos { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.botones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.tabla { overflow: auto; margin: 0 12px 12px; }
+table { width: 100%; min-width: 720px; border-collapse: separate; border-spacing: 0; font-size: .84rem; }
+th, td { padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--op-line); }
+thead th { padding-block: 10px; color: #344764; background: #edf2f9; font-size: .78rem; }
+thead th:first-child { border-radius: 10px 0 0 10px; }
+thead th:last-child { border-radius: 0 10px 10px 0; }
+tbody tr { transition: background-color .18s; }
+tbody tr:hover, tbody tr:focus-within { background: #f1f7ff; }
+tbody th { white-space: nowrap; }
+.prioridad { display: inline-block; padding: 3px 9px; border-radius: 999px; color: #455773; background: #edf2f9; font-size: .75rem; font-weight: 800; white-space: nowrap; }
+.prioridad[data-prioridad='BAJA'] { color: #1d633f; background: #e3f5ea; }
+.prioridad[data-prioridad='MEDIA'] { color: #82500a; background: #fff1d5; }
+.prioridad[data-prioridad='ALTA'] { color: #983d25; background: #ffeadc; }
+.detalle { text-decoration: none; }
+.estado { margin: 0; border-top: 1px solid var(--op-line); background: #f8faff; border-radius: 0 0 16px 16px; }
+.estado button { margin-top: 8px; }
+
+@media (max-width: 1150px) {
+  .campos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .bienvenida { background-size: auto, cover, auto; background-image: linear-gradient(90deg, #eff5fffa 45%, #eff5ffcb), url('/images/huancayo-catedral.jpg'); }
+  .campos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 360px) {
+  .campos { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  tbody tr { transition: none; }
+}

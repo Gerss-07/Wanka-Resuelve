@@ -1,0 +1,87 @@
+<section class="op-tarjeta op-pad" aria-labelledby="acciones">
+  <h2 id="acciones"><svg lucideListChecks [size]="22" aria-hidden="true"></svg> Acciones del operador</h2>
+  @if (error()) { <p class="op-error" role="alert">{{ error() }}</p> }
+  @if (enviando()) { <p class="op-intro" role="status"><span class="op-spinner" aria-hidden="true"></span>Guardando cambio…</p> }
+  @switch (reporte().estado) {
+    @case ('RECIBIDO') {
+      <form (submit)="asignar($event)" novalidate>
+        <fieldset [disabled]="ocupado() || cargandoEntidades() || !entidades().length">
+          <legend>Asignar reporte</legend>
+          <div class="op-campo">
+            <label for="prioridad">Prioridad</label>
+            @let errorPrioridad = errorCampo(asignacion.prioridad);
+            <select id="prioridad" [formField]="asignacion.prioridad"
+              [attr.aria-invalid]="errorPrioridad ? 'true' : null" [attr.aria-describedby]="errorPrioridad ? 'error-prioridad' : null">
+              <option value="">Selecciona una prioridad</option>
+              <option value="BAJA">Baja</option><option value="MEDIA">Media</option><option value="ALTA">Alta</option>
+            </select>
+            @if (errorPrioridad) { <small class="op-error" id="error-prioridad" role="alert">{{ errorPrioridad }}</small> }
+          </div>
+          <div class="op-campo">
+            <label for="entidad">Entidad responsable</label>
+            @let errorEntidad = errorCampo(asignacion.entidad);
+            <select id="entidad" [formField]="asignacion.entidad"
+              [attr.aria-invalid]="errorEntidad ? 'true' : null" [attr.aria-describedby]="errorEntidad ? 'error-entidad' : null">
+              <option value="">Selecciona una entidad</option>
+              @for (entidad of entidades(); track entidad.id) { <option [value]="entidad.id">{{ entidad.nombre }}</option> }
+            </select>
+            @if (errorEntidad) { <small class="op-error" id="error-entidad" role="alert">{{ errorEntidad }}</small> }
+          </div>
+          <button class="op-primario" type="submit" [disabled]="asignacion().invalid() || ocupado()">Asignar reporte</button>
+        </fieldset>
+      </form>
+      @if (cargandoEntidades()) {
+        <p class="op-intro" role="status">Cargando entidades…</p>
+      } @else if (errorEntidades()) {
+        <p class="op-error" role="alert">{{ errorEntidades() }}</p>
+        <button type="button" (click)="cargarEntidades()">Reintentar cargar entidades</button>
+      } @else if (!entidades().length) {
+        <p class="op-intro">No hay entidades disponibles para esta categoría.</p>
+      }
+      <form (submit)="rechazar($event)" novalidate>
+        <fieldset [disabled]="ocupado()">
+          <legend>Rechazar reporte</legend>
+          <div class="op-campo">
+            <label for="motivo">Motivo del rechazo</label>
+            @let errorMotivo = errorCampo(rechazo.motivo);
+            <textarea id="motivo" rows="3" [formField]="rechazo.motivo"
+              [attr.aria-invalid]="errorMotivo ? 'true' : null" [attr.aria-describedby]="errorMotivo ? 'error-motivo' : null"></textarea>
+            @if (errorMotivo) { <small class="op-error" id="error-motivo" role="alert">{{ errorMotivo }}</small> }
+          </div>
+          <button class="rechazar" type="submit" [disabled]="rechazo().invalid() || ocupado()">Rechazar reporte</button>
+        </fieldset>
+      </form>
+    }
+    @case ('ASIGNADO') {
+      <form (submit)="iniciarAtencion($event)" novalidate>
+        <fieldset [disabled]="ocupado()">
+          <div class="op-campo">
+            <label for="comentario">Comentario (opcional)</label>
+            @let errorComentario = errorCampo(atencion.comentario);
+            <textarea id="comentario" rows="3" [formField]="atencion.comentario"
+              [attr.aria-invalid]="errorComentario ? 'true' : null" [attr.aria-describedby]="errorComentario ? 'error-comentario' : null"></textarea>
+            @if (errorComentario) { <small class="op-error" id="error-comentario" role="alert">{{ errorComentario }}</small> }
+          </div>
+          <button class="op-primario" type="submit" [disabled]="atencion().invalid() || ocupado()">Iniciar atención</button>
+        </fieldset>
+      </form>
+    }
+    @case ('EN_ATENCION') {
+      <form (submit)="cerrar($event)" novalidate>
+        <fieldset [disabled]="ocupado()">
+          <div class="op-campo">
+            <label for="solucion">Comentario de solución</label>
+            @let errorSolucion = errorCampo(cierre.solucion);
+            <textarea id="solucion" rows="3" [formField]="cierre.solucion"
+              [attr.aria-invalid]="errorSolucion ? 'true' : null" [attr.aria-describedby]="errorSolucion ? 'error-solucion' : null"></textarea>
+            @if (errorSolucion) { <small class="op-error" id="error-solucion" role="alert">{{ errorSolucion }}</small> }
+          </div>
+          <button class="op-primario" type="submit" [disabled]="cierre().invalid() || ocupado()">Cerrar reporte</button>
+        </fieldset>
+      </form>
+    }
+    @default {
+      <p class="op-intro">El reporte está en un estado final y solo se puede consultar.</p>
+    }
+  }
+</section>
